@@ -1,0 +1,97 @@
+.accent {
+  font-size: 25;
+}
+
+.value {
+  font-size: 40;
+}
+
+.caption {
+  font-size: 25;
+}
+
+.stats-section {
+  x: 0;
+  y: 97;
+}
+
+.toggle-stats-section {
+  x: 0;
+  y: 90;
+}
+
+#weekday {
+  text-anchor: middle;
+  /* Make it centered with #dayOfMonth */
+  x: 11%+2;
+  y: 20;
+}
+
+#dayOfMonth {
+  text-anchor: middle;
+  x: 11%;
+  y: $+10;
+}
+
+#time {
+  font-size: 80;
+  text-anchor: end;
+  /* Leave space for #seconds */
+  x: 100%-45;
+  y: 60;
+}
+
+#seconds {
+  font-size: 35;
+  text-anchor: end;
+  x: 100%;
+  y: 28;
+}
+
+#distance {
+  x: 0;
+  y: 0;
+}
+
+#steps {
+  font-size: 50;
+  x: 0;
+  y: $+18;
+}
+
+#bpm {
+  text-anchor: middle;
+  x: 90%;
+  y: $-12;
+}
+
+#heartrate {
+  text-anchor: middle;
+  x: 90%;
+  y: $+10;
+}
+
+#weather-location {
+  x: 0;
+  y: 0;
+}
+
+#weather-temperature {
+  x: 0;
+  y: $+10;
+}
+
+#weather-updated {
+  x: $+15;
+  y: $-45;
+}
+
+#cgm-bg-label {
+  x: 0;
+  y: 0;
+}
+
+#cgm-bg {
+  x: 0;
+  y: $+10;
+}

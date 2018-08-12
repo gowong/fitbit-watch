@@ -1,0 +1,26 @@
+text {
+  fill: #ffffff;
+  font-family: System-Regular;
+}
+
+.accent {
+  fill: fb-orange;
+  font-family: System-Bold;
+}
+
+.caption {
+  opacity: 0.5;
+}
+
+#screen {
+/*   viewport-fill: blue; */
+}
+
+#time {
+  /* Default value is too small */
+  text-length: 32;
+}
+
+#seconds {
+  font-family: System-Bold;
+}

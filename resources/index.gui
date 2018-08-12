@@ -1,0 +1,49 @@
+<svg id="screen">
+  <section x="5%" y="5%" width="90%" height="90%">
+
+    <!-- TODO delete this -->
+    <rect width="100%" height="100%" fill="black" />
+
+    <!-- First row -->
+    <text id="weekday" class="accent" />
+    <text id="dayOfMonth" class="value" />
+    <text id="time" />
+    <text id="seconds" class="caption" />
+
+    <!-- Stats -->
+    <svg id="main-stats" class="stats-section">
+      <text id="distance" class="accent" text-buffer="0.9 mi" />
+      <text id="steps" class="value" text-buffer="1,966"/>
+      <text id="bpm" text-buffer="BPM" class="accent" />
+      <text id="heartrate" class="value" text-buffer="112" />
+      <!-- TODO add heartrate arrow -->
+      <svg id="toggle-stats-container" pointer-events="visible">
+        <svg id="weather" class="toggle-stats-section">
+          <text id="weather-location" class="accent" text-buffer="SAN FRANCISCO" />
+          <text id="weather-temperature" class="value" text-buffer="60°" />
+          <text id="weather-updated" class="caption" text-buffer="20 MIN AGO" />
+        </svg>
+        <svg id="cgm" class="toggle-stats-section">
+          <text id="cgm-bg-label" class="accent" text-buffer="BLOOD GLUCOSE" />
+          <text id="cgm-bg" class="value" text-buffer="103" />
+          <!-- TODO add arrow -->
+        </svg>
+      </svg>
+    </svg>
+
+    <!-- Blood Glucose Stats -->
+    <svg id="bg-stats" class="stats-section">
+      <text class="caption" text-buffer="BLOOD GLUCOSE" />
+    </svg>
+
+    <!-- Heart Rate Stats -->
+    <svg id="heartrate-stats" class="stats-section">
+      <text class="caption" text-buffer="HEART RATE" />
+    </svg>
+
+    <!-- Sleep Stats -->
+    <svg id="sleep-stats" class="stats-section">
+      <text class="caption" text-buffer="SLEEP" />
+    </svg>
+  </section>
+</svg>
