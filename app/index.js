@@ -1,7 +1,8 @@
 import clock from 'clock';
 import document from 'document';
-import { HeartRateSensor } from "heart-rate";
-import { preferences } from 'user-settings';
+import { HeartRateSensor } from 'heart-rate';
+import { today } from 'user-activity';
+import { preferences, units } from 'user-settings';
 import * as utils from '../common/utils';
 
 // Constants
@@ -13,7 +14,7 @@ const SCREEN_SLEEP_INDEX = 3;
 const NUM_STATS = 2;
 const STATS_WEATHER_INDEX = 0;
 const STATS_CGM_INDEX = 1;
-const UPDATE_INTERVAL_MS = 10000;
+const SENSOR_UPDATE_INTERVAL_MS = 10000;
 // Max time a stale HR reading is shown before being zeroed out
 const MAX_STALE_HEART_RATE_MS = 5000;
 
@@ -27,6 +28,8 @@ const timeEl = document.getElementById('time');
 const secondsEl = document.getElementById('seconds');
 const weekdayEl = document.getElementById('weekday');
 const dayOfMonthEl = document.getElementById('dayOfMonth');
+const stepsEl = document.getElementById('steps');
+const distanceEl = document.getElementById('distance');
 const weatherEl = document.getElementById('weather');
 const cgmEl = document.getElementById('cgm');
 const heartRateEl = document.getElementById('heartrate');
@@ -50,9 +53,19 @@ document.getElementById('toggle-stats-container').onclick = handleStatsClick;
 updateSelectedScreen();
 updateSelectedStats();
 hrm.start();
-setInterval(periodicUpdate, UPDATE_INTERVAL_MS);
+updateSensors();
+setInterval(updateSensors, SENSOR_UPDATE_INTERVAL_MS);
 
-function periodicUpdate() {
+function updateSensors() {
+  // Activity
+  const { steps, distance } = today.local;
+  stepsEl.text = steps.toLocaleString() || '0';
+  // Distance is in meters
+  const isMetric = units.distance === 'metric';
+  const convertedDistance = (isMetric ? distance / 1000 : distance * 0.00062137).toFixed(1);
+  const convertedDistanceWithUnits = isMetric ? `${convertedDistance} km` : `${convertedDistance} mi`;
+  distanceEl.text = convertedDistanceWithUnits;
+
   // Heart Rate
   const timeSinceLastReading = Date.now() - lastHrmReadingTimestamp;
   if (timeSinceLastReading >= MAX_STALE_HEART_RATE_MS) {
@@ -131,10 +144,6 @@ function updateSelectedStats() {
       show(cgmEl);
       break;
   }
-}
-
-function updateActivity() {
-  // TODO
 }
 
 function handleHeartRateReading() {

@@ -25,3 +25,13 @@ text {
 #seconds {
   font-family: System-Bold;
 }
+
+#distance {
+  /* Default value is too small */
+  text-length: 64;
+}
+
+#steps {
+  /* Default value is too small */
+  text-length: 64;
+}

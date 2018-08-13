@@ -12,8 +12,8 @@
 
     <!-- Stats -->
     <svg id="main-stats" class="stats-section">
-      <text id="distance" class="accent" text-buffer="0.9 mi" />
-      <text id="steps" class="value" text-buffer="1,966"/>
+      <text id="distance" class="accent" text-buffer="0" />
+      <text id="steps" class="value" text-buffer="0"/>
       <text id="bpm" text-buffer="BPM" class="accent" />
       <text id="heartrate" class="value" text-buffer="--" />
       <!-- TODO add heartrate arrow -->
