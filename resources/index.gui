@@ -15,7 +15,7 @@
       <text id="distance" class="accent" text-buffer="0.9 mi" />
       <text id="steps" class="value" text-buffer="1,966"/>
       <text id="bpm" text-buffer="BPM" class="accent" />
-      <text id="heartrate" class="value" text-buffer="112" />
+      <text id="heartrate" class="value" text-buffer="--" />
       <!-- TODO add heartrate arrow -->
       <svg id="toggle-stats-container" pointer-events="visible">
         <svg id="weather" class="toggle-stats-section">

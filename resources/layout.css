@@ -74,6 +74,7 @@
 #weather-location {
   x: 0;
   y: 0;
+  width: 225;
 }
 
 #weather-temperature {
@@ -84,6 +85,7 @@
 #weather-updated {
   x: $+15;
   y: $-45;
+  width: 155;
 }
 
 #cgm-bg-label {

@@ -1,6 +1,7 @@
 text {
   fill: #ffffff;
   font-family: System-Regular;
+  text-overflow: ellipsis;
 }
 
 .accent {

@@ -1,5 +1,6 @@
 import clock from 'clock';
 import document from 'document';
+import { HeartRateSensor } from "heart-rate";
 import { preferences } from 'user-settings';
 import * as utils from '../common/utils';
 
@@ -12,10 +13,14 @@ const SCREEN_SLEEP_INDEX = 3;
 const NUM_STATS = 2;
 const STATS_WEATHER_INDEX = 0;
 const STATS_CGM_INDEX = 1;
+const UPDATE_INTERVAL_MS = 10000;
+// Max time a stale HR reading is shown before being zeroed out
+const MAX_STALE_HEART_RATE_MS = 5000;
 
 // State
 let screenIndex = 0;
 let statsIndex = 0;
+let lastHrmReadingTimestamp = null;
 
 // Elements
 const timeEl = document.getElementById('time');
@@ -24,20 +29,36 @@ const weekdayEl = document.getElementById('weekday');
 const dayOfMonthEl = document.getElementById('dayOfMonth');
 const weatherEl = document.getElementById('weather');
 const cgmEl = document.getElementById('cgm');
+const heartRateEl = document.getElementById('heartrate');
 const statsEl = document.getElementById('main-stats');
 const bgStatsEl = document.getElementById('bg-stats');
 const hrStatsEl = document.getElementById('heartrate-stats');
 const sleepStatsEl = document.getElementById('sleep-stats');
 
-// Setup
+// Setup sensors
+const hrm = new HeartRateSensor();
 clock.granularity = 'seconds';
-updateSelectedScreen();
-updateSelectedStats();
 
 // Listeners
 clock.ontick = handleClockTick;
+hrm.onreading = handleHeartRateReading;
+hrm.onerror = handleHeartRateError;
 document.getElementById('screen').onclick = handleScreenClick;
 document.getElementById('toggle-stats-container').onclick = handleStatsClick;
+
+// Setup watch
+updateSelectedScreen();
+updateSelectedStats();
+hrm.start();
+setInterval(periodicUpdate, UPDATE_INTERVAL_MS);
+
+function periodicUpdate() {
+  // Heart Rate
+  const timeSinceLastReading = Date.now() - lastHrmReadingTimestamp;
+  if (timeSinceLastReading >= MAX_STALE_HEART_RATE_MS) {
+    zeroOutHeartRate();
+  }
+}
 
 function handleClockTick(event) {
   const date = event.date;
@@ -116,8 +137,23 @@ function updateActivity() {
   // TODO
 }
 
-function updateHR() {
-  // TODO
+function handleHeartRateReading() {
+  if (hrm.heartRate) {
+    lastHrmReadingTimestamp = Date.now();
+    heartRateEl.text = hrm.heartRate
+    // TODO show arrow
+  } else {
+    zeroOutHeartRate();
+  }
+}
+
+function handleHeartRateError() {
+  zeroOutHeartRate();
+}
+
+function zeroOutHeartRate() {
+  heartRateEl.text = '--';
+  // TODO hide arrow
 }
 
 function updateWeather() {
