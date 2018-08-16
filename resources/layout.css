@@ -12,12 +12,17 @@
 
 .stats-section {
   x: 0;
-  y: 97;
+  y: -25;
 }
 
 .toggle-stats-section {
   x: 0;
   y: 90;
+}
+
+.graph-label {
+  font-size: 16;
+  x: 0;
 }
 
 #weekday {
@@ -46,6 +51,10 @@
   text-anchor: end;
   x: 100%;
   y: 28;
+}
+
+#main-stats {
+  y: 97;
 }
 
 #distance {
@@ -97,3 +106,28 @@
   x: 0;
   y: $+10;
 }
+
+#graph-container {
+  x: 0;
+  y: 140;
+  width: 88%;
+  height: 110;
+}
+
+#graph-plot {
+  x: 12%;
+}
+
+#graph-label-high {
+  y: 8;
+}
+
+#graph-label-middle {
+  y: 50%+5;
+}
+
+#graph-label-low {
+  y: 100%;
+}
+
+

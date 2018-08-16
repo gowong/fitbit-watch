@@ -13,6 +13,23 @@ text {
   opacity: 0.5;
 }
 
+.graph-label {
+  font-family: System-Bold;
+}
+
+.graph-hor-line {
+  fill: #ffffff;
+  stroke-width: 1;
+  opacity: 0.2;
+}
+
+.graph-point {
+  /* Fill color should match what's in graph.js */
+  fill: #ffffff;
+  opacity: 0.85;
+  visibility: hidden;
+}
+
 #screen {
 /*   viewport-fill: blue; */
 }

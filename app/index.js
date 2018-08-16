@@ -2,8 +2,10 @@ import clock from 'clock';
 import document from 'document';
 import { HeartRateSensor } from 'heart-rate';
 import { today } from 'user-activity';
+import { user } from 'user-profile';
 import { preferences, units } from 'user-settings';
 import * as utils from '../common/utils';
+import Graph from './graph';
 
 // Constants
 const NUM_SCREENS = 4;
@@ -14,14 +16,16 @@ const SCREEN_SLEEP_INDEX = 3;
 const NUM_STATS = 2;
 const STATS_WEATHER_INDEX = 0;
 const STATS_CGM_INDEX = 1;
-const SENSOR_UPDATE_INTERVAL_MS = 10000;
+const SENSOR_UPDATE_INTERVAL_MS = 5000;
 // Max time a stale HR reading is shown before being zeroed out
 const MAX_STALE_HEART_RATE_MS = 5000;
+const HEART_RATE_GRAPH_PLOT_INTERVAL_MS = 60 * 1000;
 
 // State
-let screenIndex = 0;
+let screenIndex = SCREEN_STATS_INDEX;
 let statsIndex = 0;
 let lastHrmReadingTimestamp = null;
+let lastHrmPlotTimestamp = null;
 
 // Elements
 const timeEl = document.getElementById('time');
@@ -38,6 +42,11 @@ const bgStatsEl = document.getElementById('bg-stats');
 const hrStatsEl = document.getElementById('heartrate-stats');
 const sleepStatsEl = document.getElementById('sleep-stats');
 
+// Widgets
+// Min heart rate is resting heart rate
+// Max heart rate calculated by Fitbit is (220 - age)
+const hrGraph = new Graph('heartrate-graph', user.restingHeartRate, 220 - user.age);
+
 // Setup sensors
 const hrm = new HeartRateSensor();
 clock.granularity = 'seconds';
@@ -49,7 +58,7 @@ hrm.onerror = handleHeartRateError;
 document.getElementById('screen').onclick = handleScreenClick;
 document.getElementById('toggle-stats-container').onclick = handleStatsClick;
 
-// Setup watch
+// Setup watchface
 updateSelectedScreen();
 updateSelectedStats();
 hrm.start();
@@ -69,7 +78,7 @@ function updateSensors() {
   // Heart Rate
   const timeSinceLastReading = Date.now() - lastHrmReadingTimestamp;
   if (timeSinceLastReading >= MAX_STALE_HEART_RATE_MS) {
-    zeroOutHeartRate();
+    updateHeartRate(0);
   }
 }
 
@@ -147,22 +156,55 @@ function updateSelectedStats() {
 }
 
 function handleHeartRateReading() {
-  if (hrm.heartRate) {
-    lastHrmReadingTimestamp = Date.now();
-    heartRateEl.text = hrm.heartRate
-    // TODO show arrow
-  } else {
-    zeroOutHeartRate();
-  }
+  updateHeartRate(hrm.heartRate);
 }
 
 function handleHeartRateError() {
-  zeroOutHeartRate();
+  updateHeartRate(0);
 }
 
-function zeroOutHeartRate() {
-  heartRateEl.text = '--';
-  // TODO hide arrow
+function updateHeartRate(heartRate) {
+  const now = Date.now();
+  
+  if (heartRate) {
+    lastHrmReadingTimestamp = now;
+    heartRateEl.text = heartRate
+    // TODO show arrow
+  } else {
+    heartRateEl.text = '--';
+    // TODO hide arrow
+  }
+  
+  // Add HR reading to graph
+  // NOTE: A point is still plotted even if heartrate is 0
+  // or if a new heartrate reading hasn't been seen so that
+  // old values will be cleared over time
+  if (now - lastHrmPlotTimestamp >= HEART_RATE_GRAPH_PLOT_INTERVAL_MS) {
+    lastHrmPlotTimestamp = now;
+    // Only use a color if heart rate is valid
+    let graphPointFill;
+    if (heartRate) {
+      switch (user.heartRateZone(heartRate)) {
+        case 'peak':
+          graphPointFill = 'fb-red';
+          break;
+        case 'cardio':
+          graphPointFill = 'fb-orange';
+          break;
+        case 'fat-burn':
+          graphPointFill = 'fb-peach';
+          break;
+        case 'out-of-range':
+          graphPointFill = 'fb-mint';
+          break;
+      }
+    }
+    
+    hrGraph.addValue({
+      y: heartRate || 0,
+      fill: graphPointFill
+    });
+  }
 }
 
 function updateWeather() {

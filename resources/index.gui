@@ -33,17 +33,18 @@
 
     <!-- Blood Glucose Stats -->
     <svg id="bg-stats" class="stats-section">
-      <text class="caption" text-buffer="BLOOD GLUCOSE" />
+      <text class="accent" text-buffer="BLOOD GLUCOSE" />
     </svg>
 
     <!-- Heart Rate Stats -->
     <svg id="heartrate-stats" class="stats-section">
-      <text class="caption" text-buffer="HEART RATE" />
+      <text class="accent" text-buffer="HEART RATE" />
+      <use id="heartrate-graph" href="#graph" />
     </svg>
 
     <!-- Sleep Stats -->
     <svg id="sleep-stats" class="stats-section">
-      <text class="caption" text-buffer="SLEEP" />
+      <text class="accent" text-buffer="SLEEP" />
     </svg>
   </section>
 </svg>
