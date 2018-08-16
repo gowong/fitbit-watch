@@ -8,10 +8,11 @@ import * as utils from '../common/utils';
 import Graph from './graph';
 
 // Constants
-const NUM_SCREENS = 4;
+// TODO change to 4
+const NUM_SCREENS = 2;
 const SCREEN_STATS_INDEX = 0;
-const SCREEN_BG_INDEX = 1;
-const SCREEN_HR_INDEX = 2;
+const SCREEN_HR_INDEX = 1;
+const SCREEN_BG_INDEX = 2;
 const SCREEN_SLEEP_INDEX = 3;
 const NUM_STATS = 2;
 const STATS_WEATHER_INDEX = 0;
