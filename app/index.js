@@ -166,13 +166,32 @@ function handleHeartRateError() {
 
 function updateHeartRate(heartRate) {
   const now = Date.now();
+  let heartRateFill;
   
   if (heartRate) {
+    // Only use a color if heart rate is valid
+    switch (user.heartRateZone(heartRate)) {
+      case 'peak':
+        heartRateFill = 'fb-red';
+        break;
+      case 'cardio':
+        heartRateFill = 'fb-orange';
+        break;
+      case 'fat-burn':
+        heartRateFill = 'fb-peach';
+        break;
+      case 'out-of-range':
+        heartRateFill = 'fb-mint';
+        break;
+    }
+    
     lastHrmReadingTimestamp = now;
     heartRateEl.text = heartRate
+    heartRateEl.style.fill = heartRateFill;
     // TODO show arrow
   } else {
     heartRateEl.text = '--';
+    heartRateEl.style.fill = '#ffffff';
     // TODO hide arrow
   }
   
@@ -182,28 +201,10 @@ function updateHeartRate(heartRate) {
   // old values will be cleared over time
   if (now - lastHrmPlotTimestamp >= HEART_RATE_GRAPH_PLOT_INTERVAL_MS) {
     lastHrmPlotTimestamp = now;
-    // Only use a color if heart rate is valid
-    let graphPointFill;
-    if (heartRate) {
-      switch (user.heartRateZone(heartRate)) {
-        case 'peak':
-          graphPointFill = 'fb-red';
-          break;
-        case 'cardio':
-          graphPointFill = 'fb-orange';
-          break;
-        case 'fat-burn':
-          graphPointFill = 'fb-peach';
-          break;
-        case 'out-of-range':
-          graphPointFill = 'fb-mint';
-          break;
-      }
-    }
     
     hrGraph.addValue({
       y: heartRate || 0,
-      fill: graphPointFill
+      fill: heartRateFill
     });
   }
 }
