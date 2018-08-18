@@ -40,6 +40,18 @@ export default class Graph {
 
     this.updatePoints();
   }
+  
+  setValues(vals) {
+    if (!vals) {
+      return;
+    }
+    this.vals = vals;
+    this.updatePoints();
+  }
+  
+  getValues() {
+    return this.vals;
+  }
 
   updatePoints() {
     for (let i = 0; i < this.points.length; i++) {

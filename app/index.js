@@ -1,5 +1,7 @@
+import { me } from 'appbit';
 import clock from 'clock';
 import document from 'document';
+import * as fs from "fs";
 import { HeartRateSensor } from 'heart-rate';
 import { today } from 'user-activity';
 import { user } from 'user-profile';
@@ -8,19 +10,27 @@ import * as utils from '../common/utils';
 import Graph from './graph';
 
 // Constants
-// TODO change to 4
+// TODO change to 3
 const NUM_SCREENS = 2;
 const SCREEN_STATS_INDEX = 0;
 const SCREEN_HR_INDEX = 1;
 const SCREEN_BG_INDEX = 2;
-const SCREEN_SLEEP_INDEX = 3;
 const NUM_STATS = 2;
 const STATS_WEATHER_INDEX = 0;
 const STATS_CGM_INDEX = 1;
+
 const SENSOR_UPDATE_INTERVAL_MS = 5000;
-// Max time a stale HR reading is shown before being zeroed out
-const MAX_STALE_HEART_RATE_MS = 5000;
-const HEART_RATE_GRAPH_PLOT_INTERVAL_MS = 60 * 1000;
+// Max time an HR reading is shown before being zeroed out
+const MAX_AGE_HR_READING_MS = 5000;
+// How often HR readings are plotted on the graph
+const HR_GRAPH_PLOT_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
+
+const SETTINGS_FILENAME = 'settings.cbor';
+const SETTINGS_FILETYPE = 'cbor';
+const SETTINGS_KEY_HR_GRAPH_VALUES = 'hr_graph_values';
+const SETTINGS_KEY_HR_GRAPH_VALUES_TIMESTAMP = 'hr_graph_values_timestamp';
+// Max age of usable HR graph values loaded from settings
+const SETTINGS_MAX_AGE_HR_GRAPH_VALUES_MS = HR_GRAPH_PLOT_INTERVAL_MS;
 
 // State
 let screenIndex = SCREEN_STATS_INDEX;
@@ -41,18 +51,20 @@ const heartRateEl = document.getElementById('heartrate');
 const statsEl = document.getElementById('main-stats');
 const bgStatsEl = document.getElementById('bg-stats');
 const hrStatsEl = document.getElementById('heartrate-stats');
-const sleepStatsEl = document.getElementById('sleep-stats');
+
+// Load settings so it can be used in the rest of initialization
+const settings = loadSettings();
 
 // Widgets
-// Min heart rate is resting heart rate
-// Max heart rate calculated by Fitbit is (220 - age)
-const hrGraph = new Graph('heartrate-graph', user.restingHeartRate, 220 - user.age);
+let hrGraph;
+initializeGraphs();
 
 // Setup sensors
 const hrm = new HeartRateSensor();
 clock.granularity = 'seconds';
 
 // Listeners
+me.onunload = handleAppUnload;
 clock.ontick = handleClockTick;
 hrm.onreading = handleHeartRateReading;
 hrm.onerror = handleHeartRateError;
@@ -66,6 +78,13 @@ hrm.start();
 updateSensors();
 setInterval(updateSensors, SENSOR_UPDATE_INTERVAL_MS);
 
+function initializeGraphs() {
+  // Min heart rate is resting heart rate
+  // Max heart rate calculated by Fitbit is (220 - age)
+  hrGraph = new Graph('heartrate-graph', user.restingHeartRate, 220 - user.age);
+  hrGraph.setValues(settings[SETTINGS_KEY_HR_GRAPH_VALUES]);
+}
+
 function updateSensors() {
   // Activity
   const { steps, distance } = today.local;
@@ -78,7 +97,7 @@ function updateSensors() {
 
   // Heart Rate
   const timeSinceLastReading = Date.now() - lastHrmReadingTimestamp;
-  if (timeSinceLastReading >= MAX_STALE_HEART_RATE_MS) {
+  if (timeSinceLastReading >= MAX_AGE_HR_READING_MS) {
     updateHeartRate(0);
   }
 }
@@ -116,7 +135,6 @@ function updateSelectedScreen() {
   hide(statsEl);
   hide(bgStatsEl);
   hide(hrStatsEl);
-  hide(sleepStatsEl);
 
   // Show correct one
   switch (screenIndex) {
@@ -128,9 +146,6 @@ function updateSelectedScreen() {
       break;
     case SCREEN_HR_INDEX:
       show(hrStatsEl);
-      break;
-    case SCREEN_SLEEP_INDEX:
-      show(sleepStatsEl);
       break;
   }
 }
@@ -199,7 +214,7 @@ function updateHeartRate(heartRate) {
   // NOTE: A point is still plotted even if heartrate is 0
   // or if a new heartrate reading hasn't been seen so that
   // old values will be cleared over time
-  if (now - lastHrmPlotTimestamp >= HEART_RATE_GRAPH_PLOT_INTERVAL_MS) {
+  if (now - lastHrmPlotTimestamp >= HR_GRAPH_PLOT_INTERVAL_MS) {
     lastHrmPlotTimestamp = now;
     
     hrGraph.addValue({
@@ -217,8 +232,23 @@ function updateCGM() {
   // TODO change color based on BG
 }
 
-function updateSleep() {
-  // TODO
+function handleAppUnload() {
+  settings[SETTINGS_KEY_HR_GRAPH_VALUES] = hrGraph.getValues();
+  settings[SETTINGS_KEY_HR_GRAPH_VALUES_TIMESTAMP] = Date.now();
+  fs.writeFileSync(SETTINGS_FILENAME, settings, SETTINGS_FILETYPE);
+}
+
+function loadSettings() {
+  try {
+    const settings = fs.readFileSync(SETTINGS_FILENAME, SETTINGS_FILETYPE);
+    if (Date.now() - settings[SETTINGS_KEY_HR_GRAPH_VALUES_TIMESTAMP] > SETTINGS_MAX_AGE_HR_GRAPH_VALUES_MS) {
+      delete settings[SETTINGS_KEY_HR_GRAPH_VALUES];
+    }
+    return settings;
+  } catch (e) {
+    // Settings file might not exist
+    return {};
+  }
 }
 
 function show(element) {

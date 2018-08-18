@@ -41,10 +41,5 @@
       <text class="accent" text-buffer="HEART RATE" />
       <use id="heartrate-graph" href="#graph" />
     </svg>
-
-    <!-- Sleep Stats -->
-    <svg id="sleep-stats" class="stats-section">
-      <text class="accent" text-buffer="SLEEP" />
-    </svg>
   </section>
 </svg>
