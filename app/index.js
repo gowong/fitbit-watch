@@ -27,14 +27,19 @@ const HR_GRAPH_PLOT_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
 
 const SETTINGS_FILENAME = 'settings.cbor';
 const SETTINGS_FILETYPE = 'cbor';
+const SETTINGS_KEY_SCREEN_INDEX = 'screen_index';
+const SETTINGS_KEY_STATS_INDEX = 'stats_index';
 const SETTINGS_KEY_HR_GRAPH_VALUES = 'hr_graph_values';
 const SETTINGS_KEY_HR_GRAPH_VALUES_TIMESTAMP = 'hr_graph_values_timestamp';
 // Max age of usable HR graph values loaded from settings
 const SETTINGS_MAX_AGE_HR_GRAPH_VALUES_MS = HR_GRAPH_PLOT_INTERVAL_MS;
 
+// Load settings so it can be used in the rest of initialization
+const settings = loadSettings();
+
 // State
-let screenIndex = SCREEN_STATS_INDEX;
-let statsIndex = 0;
+let screenIndex = settings[SETTINGS_KEY_SCREEN_INDEX] || SCREEN_STATS_INDEX;
+let statsIndex = settings[SETTINGS_KEY_STATS_INDEX] || STATS_WEATHER_INDEX;
 let lastHrmReadingTimestamp = null;
 let lastHrmPlotTimestamp = null;
 
@@ -51,9 +56,6 @@ const heartRateEl = document.getElementById('heartrate');
 const statsEl = document.getElementById('main-stats');
 const bgStatsEl = document.getElementById('bg-stats');
 const hrStatsEl = document.getElementById('heartrate-stats');
-
-// Load settings so it can be used in the rest of initialization
-const settings = loadSettings();
 
 // Widgets
 let hrGraph;
@@ -235,6 +237,8 @@ function updateCGM() {
 function handleAppUnload() {
   settings[SETTINGS_KEY_HR_GRAPH_VALUES] = hrGraph.getValues();
   settings[SETTINGS_KEY_HR_GRAPH_VALUES_TIMESTAMP] = Date.now();
+  settings[SETTINGS_KEY_SCREEN_INDEX] = screenIndex;
+  settings[SETTINGS_KEY_STATS_INDEX] = statsIndex;
   fs.writeFileSync(SETTINGS_FILENAME, settings, SETTINGS_FILETYPE);
 }
 
