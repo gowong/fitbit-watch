@@ -22,6 +22,7 @@ const STATS_WEATHER_INDEX = 0;
 const STATS_CGM_INDEX = 1;
 
 const ACTIVITY_UPDATE_INTERVAL_MS = 5000;
+const WEATHER_TIMESTAMP_UPDATE_INTERVAL_MS = 60 * 1000; // 1 minute
 // Max time an HR reading is shown before being zeroed out
 const MAX_AGE_HR_READING_MS = 5000;
 // How often HR readings are plotted on the graph
@@ -43,6 +44,7 @@ let screenIndex = prevState[STATE_KEY_SCREEN_INDEX] || SCREEN_STATS_INDEX;
 let statsIndex = prevState[STATE_KEY_STATS_INDEX] || STATS_WEATHER_INDEX;
 let lastHrmReadingTimestamp = null;
 let lastHrmPlotTimestamp = null;
+let weatherUpdatedTimestamp = null;
 
 // Elements
 const timeEl = document.getElementById('time');
@@ -86,6 +88,7 @@ updateActivity();
 updateWeather();
 handleNewFiles();
 setInterval(updateActivity, ACTIVITY_UPDATE_INTERVAL_MS);
+setInterval(updateWeatherTimestamp, WEATHER_TIMESTAMP_UPDATE_INTERVAL_MS);
 
 function initializeGraphs() {
   // Min heart rate is resting heart rate
@@ -247,7 +250,15 @@ function updateWeather() {
   const weather = fs.readFileSync(fileTransfer.WEATHER_DATA_FILENAME, fileTransfer.WEATHER_DATA_FILETYPE);
   weatherTempEl.text = `${weather.temp}°`;
   weatherLocationEl.text = weather.city.toUpperCase();
-  const timeDiff = Date.now() - (new Date(weather.timestamp)).getTime();
+  weatherUpdatedTimestamp = weather.timestamp;
+  updateWeatherTimestamp();
+}
+
+function updateWeatherTimestamp() {
+  if (!weatherUpdatedTimestamp) {
+    return;
+  }
+  const timeDiff = Date.now() - (new Date(weatherUpdatedTimestamp)).getTime();
   const minutes = Math.round(timeDiff / 60 / 1000);
   if (minutes <= 1) {
     weatherUpdatedEl.text = "NOW";
