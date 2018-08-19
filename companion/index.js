@@ -14,12 +14,31 @@ const WEATHER_UPDATE_INTERVAL_MS = (60 * 60 * 1000) - (5 * 60 * 1000); // 55 min
 
 const STORAGE_KEY_WEATHER_TIMESTAMP = 'weather_timestamp';
 
+// State
+let wakeTimer = null;
+
 // Setup
+// Wake interval periodically wakes the companion app
+// ONLY IF the companion app is NOT currently running
 me.wakeInterval = WAKE_INTERVAL_MS;
+// Setup timer that will execute periodically
+// ONLY IF the companion app is currently running
+setupTimer();
 
 // Launch reason
-if (me.launchReasons.wokenUp
-   || me.launchReasons.peerAppLaunched) {
+if (me.launchReasons.wokenUp) {
+  handleWake();
+}
+if (me.launchReasons.settingsChanged) {
+  // TODO is this needed?
+}
+
+function setupTimer() {
+  clearInterval(wakeTimer);
+  wakeTimer = setInterval(handleWake, WAKE_INTERVAL_MS);
+}
+
+function handleWake() {
   // Perform periodic data updates
   const now = Date.now();
   // Update weather if needed
@@ -27,9 +46,6 @@ if (me.launchReasons.wokenUp
   if (now - lastWeatherUpdateTimestamp >= WEATHER_UPDATE_INTERVAL_MS) {
     updateWeather();
   }
-}
-if (me.launchReasons.settingsChanged) {
-  // TODO is this needed?
 }
 
 function updateWeather() {
@@ -43,7 +59,7 @@ function updateWeather() {
         });
     }).catch((error) => {
       // TODO send error message to watch
-      console.log('Update weather error: ' + error);
+      console.error('Companion update weather error: ' + error);
     });
 }
 
