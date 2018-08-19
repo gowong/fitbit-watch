@@ -25,21 +25,21 @@ const MAX_AGE_HR_READING_MS = 5000;
 // How often HR readings are plotted on the graph
 const HR_GRAPH_PLOT_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
 
-const SETTINGS_FILENAME = 'settings.cbor';
-const SETTINGS_FILETYPE = 'cbor';
-const SETTINGS_KEY_SCREEN_INDEX = 'screen_index';
-const SETTINGS_KEY_STATS_INDEX = 'stats_index';
-const SETTINGS_KEY_HR_GRAPH_VALUES = 'hr_graph_values';
-const SETTINGS_KEY_HR_GRAPH_VALUES_TIMESTAMP = 'hr_graph_values_timestamp';
-// Max age of usable HR graph values loaded from settings
-const SETTINGS_MAX_AGE_HR_GRAPH_VALUES_MS = HR_GRAPH_PLOT_INTERVAL_MS;
+const STATE_FILENAME = 'prev_state.cbor';
+const STATE_FILETYPE = 'cbor';
+const STATE_KEY_SCREEN_INDEX = 'screen_index';
+const STATE_KEY_STATS_INDEX = 'stats_index';
+const STATE_KEY_HR_GRAPH_VALUES = 'hr_graph_values';
+const STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP = 'hr_graph_values_timestamp';
+// Max age of usable HR graph values loaded from previous state
+const STATE_MAX_AGE_HR_GRAPH_VALUES_MS = HR_GRAPH_PLOT_INTERVAL_MS;
 
-// Load settings so it can be used in the rest of initialization
-const settings = loadSettings();
+// Load previous state so it can be used in the rest of initialization
+const prevState = loadPreviousState();
 
 // State
-let screenIndex = settings[SETTINGS_KEY_SCREEN_INDEX] || SCREEN_STATS_INDEX;
-let statsIndex = settings[SETTINGS_KEY_STATS_INDEX] || STATS_WEATHER_INDEX;
+let screenIndex = prevState[STATE_KEY_SCREEN_INDEX] || SCREEN_STATS_INDEX;
+let statsIndex = prevState[STATE_KEY_STATS_INDEX] || STATS_WEATHER_INDEX;
 let lastHrmReadingTimestamp = null;
 let lastHrmPlotTimestamp = null;
 
@@ -84,7 +84,7 @@ function initializeGraphs() {
   // Min heart rate is resting heart rate
   // Max heart rate calculated by Fitbit is (220 - age)
   hrGraph = new Graph('heartrate-graph', user.restingHeartRate, 220 - user.age);
-  hrGraph.setValues(settings[SETTINGS_KEY_HR_GRAPH_VALUES]);
+  hrGraph.setValues(prevState[STATE_KEY_HR_GRAPH_VALUES]);
 }
 
 function updateSensors() {
@@ -184,7 +184,7 @@ function handleHeartRateError() {
 function updateHeartRate(heartRate) {
   const now = Date.now();
   let heartRateFill;
-  
+
   if (heartRate) {
     // Only use a color if heart rate is valid
     switch (user.heartRateZone(heartRate)) {
@@ -201,7 +201,7 @@ function updateHeartRate(heartRate) {
         heartRateFill = 'fb-mint';
         break;
     }
-    
+
     lastHrmReadingTimestamp = now;
     heartRateEl.text = heartRate
     heartRateEl.style.fill = heartRateFill;
@@ -211,14 +211,14 @@ function updateHeartRate(heartRate) {
     heartRateEl.style.fill = '#ffffff';
     // TODO hide arrow
   }
-  
+
   // Add HR reading to graph
   // NOTE: A point is still plotted even if heartrate is 0
   // or if a new heartrate reading hasn't been seen so that
   // old values will be cleared over time
   if (now - lastHrmPlotTimestamp >= HR_GRAPH_PLOT_INTERVAL_MS) {
     lastHrmPlotTimestamp = now;
-    
+
     hrGraph.addValue({
       y: heartRate || 0,
       fill: heartRateFill
@@ -235,22 +235,22 @@ function updateCGM() {
 }
 
 function handleAppUnload() {
-  settings[SETTINGS_KEY_HR_GRAPH_VALUES] = hrGraph.getValues();
-  settings[SETTINGS_KEY_HR_GRAPH_VALUES_TIMESTAMP] = Date.now();
-  settings[SETTINGS_KEY_SCREEN_INDEX] = screenIndex;
-  settings[SETTINGS_KEY_STATS_INDEX] = statsIndex;
-  fs.writeFileSync(SETTINGS_FILENAME, settings, SETTINGS_FILETYPE);
+  prevState[STATE_KEY_HR_GRAPH_VALUES] = hrGraph.getValues();
+  prevState[STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP] = Date.now();
+  prevState[STATE_KEY_SCREEN_INDEX] = screenIndex;
+  prevState[STATE_KEY_STATS_INDEX] = statsIndex;
+  fs.writeFileSync(STATE_FILENAME, prevState, STATE_FILETYPE);
 }
 
-function loadSettings() {
+function loadPreviousState() {
   try {
-    const settings = fs.readFileSync(SETTINGS_FILENAME, SETTINGS_FILETYPE);
-    if (Date.now() - settings[SETTINGS_KEY_HR_GRAPH_VALUES_TIMESTAMP] > SETTINGS_MAX_AGE_HR_GRAPH_VALUES_MS) {
-      delete settings[SETTINGS_KEY_HR_GRAPH_VALUES];
+    const prevState = fs.readFileSync(STATE_FILENAME, STATE_FILETYPE);
+    if (Date.now() - prevState[STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP] > STATE_MAX_AGE_HR_GRAPH_VALUES_MS) {
+      delete prevState[STATE_KEY_HR_GRAPH_VALUES];
     }
-    return settings;
+    return prevState;
   } catch (e) {
-    // Settings file might not exist
+    // State file might not exist
     return {};
   }
 }
