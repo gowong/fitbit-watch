@@ -19,9 +19,9 @@
       <!-- TODO add heartrate arrow -->
       <svg id="toggle-stats-container" pointer-events="visible">
         <svg id="weather" class="toggle-stats-section">
-          <text id="weather-location" class="accent" text-buffer="SAN FRANCISCO" />
-          <text id="weather-temperature" class="value" text-buffer="60°" />
-          <text id="weather-updated" class="caption" text-buffer="20 MIN AGO" />
+          <text id="weather-location" class="accent" text-buffer="WEATHER" />
+          <text id="weather-temperature" class="value" text-buffer="--" />
+          <text id="weather-updated" class="caption" text-buffer="" />
         </svg>
         <svg id="cgm" class="toggle-stats-section">
           <text id="cgm-bg-label" class="accent" text-buffer="BLOOD GLUCOSE" />

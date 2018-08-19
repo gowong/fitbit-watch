@@ -52,3 +52,18 @@ text {
   /* Default value is too small */
   text-length: 64;
 }
+
+#weather-location {
+  /* Default value is too small */
+  text-length: 64;
+}
+
+#weather-temperature {
+  /* Default value is too small */
+  text-length: 32;
+}
+
+#weather-updated {
+  /* Default value is too small */
+  text-length: 32;
+}

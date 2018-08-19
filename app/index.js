@@ -6,7 +6,9 @@ import { HeartRateSensor } from 'heart-rate';
 import { today } from 'user-activity';
 import { user } from 'user-profile';
 import { preferences, units } from 'user-settings';
+import { inbox } from 'file-transfer';
 import * as utils from '../common/utils';
+import fileTransfer from '../common/file-transfer';
 import Graph from './graph';
 
 // Constants
@@ -19,7 +21,7 @@ const NUM_STATS = 2;
 const STATS_WEATHER_INDEX = 0;
 const STATS_CGM_INDEX = 1;
 
-const SENSOR_UPDATE_INTERVAL_MS = 5000;
+const ACTIVITY_UPDATE_INTERVAL_MS = 5000;
 // Max time an HR reading is shown before being zeroed out
 const MAX_AGE_HR_READING_MS = 5000;
 // How often HR readings are plotted on the graph
@@ -34,10 +36,9 @@ const STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP = 'hr_graph_values_timestamp';
 // Max age of usable HR graph values loaded from previous state
 const STATE_MAX_AGE_HR_GRAPH_VALUES_MS = HR_GRAPH_PLOT_INTERVAL_MS;
 
+// State
 // Load previous state so it can be used in the rest of initialization
 const prevState = loadPreviousState();
-
-// State
 let screenIndex = prevState[STATE_KEY_SCREEN_INDEX] || SCREEN_STATS_INDEX;
 let statsIndex = prevState[STATE_KEY_STATS_INDEX] || STATS_WEATHER_INDEX;
 let lastHrmReadingTimestamp = null;
@@ -51,6 +52,9 @@ const dayOfMonthEl = document.getElementById('dayOfMonth');
 const stepsEl = document.getElementById('steps');
 const distanceEl = document.getElementById('distance');
 const weatherEl = document.getElementById('weather');
+const weatherTempEl = document.getElementById('weather-temperature');
+const weatherLocationEl = document.getElementById('weather-location');
+const weatherUpdatedEl = document.getElementById('weather-updated');
 const cgmEl = document.getElementById('cgm');
 const heartRateEl = document.getElementById('heartrate');
 const statsEl = document.getElementById('main-stats');
@@ -70,6 +74,7 @@ me.onunload = handleAppUnload;
 clock.ontick = handleClockTick;
 hrm.onreading = handleHeartRateReading;
 hrm.onerror = handleHeartRateError;
+inbox.addEventListener('newFile', handleNewFiles);
 document.getElementById('screen').onclick = handleScreenClick;
 document.getElementById('toggle-stats-container').onclick = handleStatsClick;
 
@@ -77,8 +82,10 @@ document.getElementById('toggle-stats-container').onclick = handleStatsClick;
 updateSelectedScreen();
 updateSelectedStats();
 hrm.start();
-updateSensors();
-setInterval(updateSensors, SENSOR_UPDATE_INTERVAL_MS);
+updateActivity();
+updateWeather();
+handleNewFiles();
+setInterval(updateActivity, ACTIVITY_UPDATE_INTERVAL_MS);
 
 function initializeGraphs() {
   // Min heart rate is resting heart rate
@@ -87,7 +94,7 @@ function initializeGraphs() {
   hrGraph.setValues(prevState[STATE_KEY_HR_GRAPH_VALUES]);
 }
 
-function updateSensors() {
+function updateActivity() {
   // Activity
   const { steps, distance } = today.local;
   stepsEl.text = steps.toLocaleString() || '0';
@@ -226,12 +233,35 @@ function updateHeartRate(heartRate) {
   }
 }
 
+function handleNewFiles() {
+  let fileName; while (fileName = inbox.nextFile()) {
+    switch (fileName) {
+      case fileTransfer.WEATHER_DATA_FILENAME:
+        updateWeather();
+        break;
+    }
+  }
+}
+
 function updateWeather() {
-  // TODO
+  const weather = fs.readFileSync(fileTransfer.WEATHER_DATA_FILENAME, fileTransfer.WEATHER_DATA_FILETYPE);
+  weatherTempEl.text = `${weather.temp}°`;
+  weatherLocationEl.text = weather.city.toUpperCase();
+  const timeDiff = Date.now() - (new Date(weather.timestamp)).getTime();
+  const minutes = Math.round(timeDiff / 60 / 1000);
+  if (minutes <= 1) {
+    weatherUpdatedEl.text = "NOW";
+  } else if (minutes >= 60) {
+    const hours = Math.round(minutes / 60);
+    weatherUpdatedEl.text = `${hours} HR AGO`;    
+  } else {
+    weatherUpdatedEl.text = `${minutes} MIN AGO`;
+  }
 }
 
 function updateCGM() {
   // TODO change color based on BG
+  // TODO read data from file
 }
 
 function handleAppUnload() {
