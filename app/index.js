@@ -1,12 +1,13 @@
 import { me } from 'appbit';
 import clock from 'clock';
 import document from 'document';
+import { display } from 'display';
+import { inbox } from 'file-transfer';
 import * as fs from "fs";
 import { HeartRateSensor } from 'heart-rate';
 import { today } from 'user-activity';
 import { user } from 'user-profile';
 import { preferences, units } from 'user-settings';
-import { inbox } from 'file-transfer';
 import * as utils from '../common/utils';
 import fileTransfer from '../common/file-transfer';
 import Graph from './graph';
@@ -45,6 +46,8 @@ let statsIndex = prevState[STATE_KEY_STATS_INDEX] || STATS_WEATHER_INDEX;
 let lastHrmReadingTimestamp = null;
 let lastHrmPlotTimestamp = null;
 let weatherUpdatedTimestamp = null;
+let updateActivityTimer = null;
+let updateWeatherTimer = null;
 
 // Elements
 const timeEl = document.getElementById('time');
@@ -73,10 +76,11 @@ clock.granularity = 'seconds';
 
 // Listeners
 me.onunload = handleAppUnload;
+display.onchange = handleDisplayChange;
 clock.ontick = handleClockTick;
 hrm.onreading = handleHeartRateReading;
 hrm.onerror = handleHeartRateError;
-inbox.addEventListener('newFile', handleNewFiles);
+inbox.onnewfile = handleNewFiles;
 document.getElementById('screen').onclick = handleScreenClick;
 document.getElementById('toggle-stats-container').onclick = handleStatsClick;
 
@@ -87,31 +91,58 @@ hrm.start();
 updateActivity();
 updateWeather();
 handleNewFiles();
-setInterval(updateActivity, ACTIVITY_UPDATE_INTERVAL_MS);
-setInterval(updateWeatherTimestamp, WEATHER_TIMESTAMP_UPDATE_INTERVAL_MS);
+setupTimers();
 
-function initializeGraphs() {
-  // Min heart rate is resting heart rate
-  // Max heart rate calculated by Fitbit is (220 - age)
-  hrGraph = new Graph('heartrate-graph', user.restingHeartRate, 220 - user.age);
-  hrGraph.setValues(prevState[STATE_KEY_HR_GRAPH_VALUES]);
+function loadPreviousState() {
+  try {
+    const prevState = fs.readFileSync(STATE_FILENAME, STATE_FILETYPE);
+    if (Date.now() - prevState[STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP] > STATE_MAX_AGE_HR_GRAPH_VALUES_MS) {
+      delete prevState[STATE_KEY_HR_GRAPH_VALUES];
+    }
+    return prevState;
+  } catch (e) {
+    console.error('Device load previous state error: ' + error);
+    // State file might not exist
+    return {};
+  }
 }
 
-function updateActivity() {
-  // Activity
-  const { steps, distance } = today.local;
-  stepsEl.text = steps.toLocaleString() || '0';
-  // Distance is in meters
-  const isMetric = units.distance === 'metric';
-  const convertedDistance = (isMetric ? distance / 1000 : distance * 0.00062137).toFixed(1);
-  const convertedDistanceWithUnits = isMetric ? `${convertedDistance} km` : `${convertedDistance} mi`;
-  distanceEl.text = convertedDistanceWithUnits;
+function handleAppUnload() {
+  prevState[STATE_KEY_HR_GRAPH_VALUES] = hrGraph.getValues();
+  prevState[STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP] = Date.now();
+  prevState[STATE_KEY_SCREEN_INDEX] = screenIndex;
+  prevState[STATE_KEY_STATS_INDEX] = statsIndex;
+  fs.writeFileSync(STATE_FILENAME, prevState, STATE_FILETYPE);
+}
 
-  // Heart Rate
-  const timeSinceLastReading = Date.now() - lastHrmReadingTimestamp;
-  if (timeSinceLastReading >= MAX_AGE_HR_READING_MS) {
-    updateHeartRate(0);
+function handleNewFiles() {
+  let fileName; while (fileName = inbox.nextFile()) {
+    switch (fileName) {
+      case fileTransfer.WEATHER_DATA_FILENAME:
+        updateWeather();
+        break;
+    }
   }
+}
+
+function handleDisplayChange() {
+  const isDisplayOn = this.on;
+  if (isDisplayOn) {
+    setupTimers();
+  } else {
+    clearTimers();
+  }
+}
+
+function setupTimers() {
+  clearTimers();
+  updateActivityTimer = setInterval(updateActivity, ACTIVITY_UPDATE_INTERVAL_MS);
+  updateWeatherTimer = setInterval(updateWeatherTime, WEATHER_TIMESTAMP_UPDATE_INTERVAL_MS);
+}
+
+function clearTimers() {
+  clearInterval(updateActivityTimer);
+  clearInterval(updateWeatherTimer);
 }
 
 function handleClockTick(event) {
@@ -137,50 +168,28 @@ function handleClockTick(event) {
   dayOfMonthEl.text = dayOfMonth;
 }
 
-function handleScreenClick(event) {
-  screenIndex = ++screenIndex % NUM_SCREENS;
-  updateSelectedScreen();
-}
+function updateActivity() {
+  // Activity
+  const { steps, distance } = today.local;
+  stepsEl.text = steps.toLocaleString() || '0';
+  // Distance is in meters
+  const isMetric = units.distance === 'metric';
+  const convertedDistance = (isMetric ? distance / 1000 : distance * 0.00062137).toFixed(1);
+  const convertedDistanceWithUnits = isMetric ? `${convertedDistance} km` : `${convertedDistance} mi`;
+  distanceEl.text = convertedDistanceWithUnits;
 
-function updateSelectedScreen() {
-  // Hide all screens
-  hide(statsEl);
-  hide(bgStatsEl);
-  hide(hrStatsEl);
-
-  // Show correct one
-  switch (screenIndex) {
-    case SCREEN_STATS_INDEX:
-      show(statsEl);
-      break;
-    case SCREEN_BG_INDEX:
-      show(bgStatsEl);
-      break;
-    case SCREEN_HR_INDEX:
-      show(hrStatsEl);
-      break;
+  // Heart Rate
+  const timeSinceLastReading = Date.now() - lastHrmReadingTimestamp;
+  if (timeSinceLastReading >= MAX_AGE_HR_READING_MS) {
+    updateHeartRate(0);
   }
 }
 
-function handleStatsClick(event) {
-  statsIndex = ++statsIndex % NUM_STATS;
-  updateSelectedStats();
-}
-
-function updateSelectedStats() {
-  // Hide all stats
-  hide(weatherEl);
-  hide(cgmEl);
-
-  // Show correct one
-  switch (statsIndex) {
-    case STATS_WEATHER_INDEX:
-      show(weatherEl);
-      break;
-    case STATS_CGM_INDEX:
-      show(cgmEl);
-      break;
-  }
+function initializeGraphs() {
+  // Min heart rate is resting heart rate
+  // Max heart rate calculated by Fitbit is (220 - age)
+  hrGraph = new Graph('heartrate-graph', user.restingHeartRate, 220 - user.age);
+  hrGraph.setValues(prevState[STATE_KEY_HR_GRAPH_VALUES]);
 }
 
 function handleHeartRateReading() {
@@ -236,25 +245,20 @@ function updateHeartRate(heartRate) {
   }
 }
 
-function handleNewFiles() {
-  let fileName; while (fileName = inbox.nextFile()) {
-    switch (fileName) {
-      case fileTransfer.WEATHER_DATA_FILENAME:
-        updateWeather();
-        break;
-    }
+function updateWeather() {
+  try {
+    const weather = fs.readFileSync(fileTransfer.WEATHER_DATA_FILENAME, fileTransfer.WEATHER_DATA_FILETYPE);
+    weatherTempEl.text = `${weather.temp}°`;
+    weatherLocationEl.text = weather.city.toUpperCase();
+    weatherUpdatedTimestamp = weather.timestamp;
+    updateWeatherTime();
+  } catch (error) {
+    // Weather file might not exist (if weather hasn't been loaded before)
+    console.error('Device update weather error: ' + error);
   }
 }
 
-function updateWeather() {
-  const weather = fs.readFileSync(fileTransfer.WEATHER_DATA_FILENAME, fileTransfer.WEATHER_DATA_FILETYPE);
-  weatherTempEl.text = `${weather.temp}°`;
-  weatherLocationEl.text = weather.city.toUpperCase();
-  weatherUpdatedTimestamp = weather.timestamp;
-  updateWeatherTimestamp();
-}
-
-function updateWeatherTimestamp() {
+function updateWeatherTime() {
   if (!weatherUpdatedTimestamp) {
     return;
   }
@@ -275,24 +279,49 @@ function updateCGM() {
   // TODO read data from file
 }
 
-function handleAppUnload() {
-  prevState[STATE_KEY_HR_GRAPH_VALUES] = hrGraph.getValues();
-  prevState[STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP] = Date.now();
-  prevState[STATE_KEY_SCREEN_INDEX] = screenIndex;
-  prevState[STATE_KEY_STATS_INDEX] = statsIndex;
-  fs.writeFileSync(STATE_FILENAME, prevState, STATE_FILETYPE);
+function handleScreenClick(event) {
+  screenIndex = ++screenIndex % NUM_SCREENS;
+  updateSelectedScreen();
 }
 
-function loadPreviousState() {
-  try {
-    const prevState = fs.readFileSync(STATE_FILENAME, STATE_FILETYPE);
-    if (Date.now() - prevState[STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP] > STATE_MAX_AGE_HR_GRAPH_VALUES_MS) {
-      delete prevState[STATE_KEY_HR_GRAPH_VALUES];
-    }
-    return prevState;
-  } catch (e) {
-    // State file might not exist
-    return {};
+function updateSelectedScreen() {
+  // Hide all screens
+  hide(statsEl);
+  hide(bgStatsEl);
+  hide(hrStatsEl);
+
+  // Show correct one
+  switch (screenIndex) {
+    case SCREEN_STATS_INDEX:
+      show(statsEl);
+      break;
+    case SCREEN_BG_INDEX:
+      show(bgStatsEl);
+      break;
+    case SCREEN_HR_INDEX:
+      show(hrStatsEl);
+      break;
+  }
+}
+
+function handleStatsClick(event) {
+  statsIndex = ++statsIndex % NUM_STATS;
+  updateSelectedStats();
+}
+
+function updateSelectedStats() {
+  // Hide all stats
+  hide(weatherEl);
+  hide(cgmEl);
+
+  // Show correct one
+  switch (statsIndex) {
+    case STATS_WEATHER_INDEX:
+      show(weatherEl);
+      break;
+    case STATS_CGM_INDEX:
+      show(cgmEl);
+      break;
   }
 }
 
