@@ -22,8 +22,7 @@ const NUM_STATS = 2;
 const STATS_WEATHER_INDEX = 0;
 const STATS_CGM_INDEX = 1;
 
-const ACTIVITY_UPDATE_INTERVAL_MS = 5000;
-const WEATHER_TIMESTAMP_UPDATE_INTERVAL_MS = 60 * 1000; // 1 minute
+const ACTIVITY_UPDATE_INTERVAL_MS = 3000;
 // Max time an HR reading is shown before being zeroed out
 const MAX_AGE_HR_READING_MS = 5000;
 // How often HR readings are plotted on the graph
@@ -47,7 +46,6 @@ let lastHrmReadingTimestamp = null;
 let lastHrmPlotTimestamp = null;
 let weatherUpdatedTimestamp = null;
 let updateActivityTimer = null;
-let updateWeatherTimer = null;
 
 // Elements
 const timeEl = document.getElementById('time');
@@ -129,6 +127,11 @@ function handleDisplayChange() {
   const isDisplayOn = this.on;
   if (isDisplayOn) {
     setupTimers();
+    // Execute immediately in case display wasn't on for long enough for timers to execute
+    updateActivity();
+    // Only update weather time when display wakes up since the timestamp isn't
+    // very important and it only needs to be updated every minute anyways
+    updateWeatherTime();
   } else {
     clearTimers();
   }
@@ -137,12 +140,10 @@ function handleDisplayChange() {
 function setupTimers() {
   clearTimers();
   updateActivityTimer = setInterval(updateActivity, ACTIVITY_UPDATE_INTERVAL_MS);
-  updateWeatherTimer = setInterval(updateWeatherTime, WEATHER_TIMESTAMP_UPDATE_INTERVAL_MS);
 }
 
 function clearTimers() {
   clearInterval(updateActivityTimer);
-  clearInterval(updateWeatherTimer);
 }
 
 function handleClockTick(event) {
@@ -268,7 +269,7 @@ function updateWeatherTime() {
     weatherUpdatedEl.text = "NOW";
   } else if (minutes >= 60) {
     const hours = Math.round(minutes / 60);
-    weatherUpdatedEl.text = `${hours} HR AGO`;    
+    weatherUpdatedEl.text = `${hours} HR AGO`;
   } else {
     weatherUpdatedEl.text = `${minutes} MIN AGO`;
   }
