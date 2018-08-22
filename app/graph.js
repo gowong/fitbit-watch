@@ -19,7 +19,7 @@ export default class Graph {
     this.scaleY = (maxY - minY) / this.graphHeight;
     
     this.highLabel.text = maxY;
-    this.midLabel.text = Math.round((maxY - minY) / 2);
+    this.midLabel.text = Math.round((maxY + minY) / 2);
     this.lowLabel.text = minY;
   }
 
