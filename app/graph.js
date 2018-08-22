@@ -49,6 +49,11 @@ export default class Graph {
     this.updatePoints();
   }
   
+  clearValues() {
+    this.vals = [];
+    this.updatePoints();
+  }
+  
   getValues() {
     return this.vals;
   }

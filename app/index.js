@@ -27,6 +27,8 @@ const ACTIVITY_UPDATE_INTERVAL_MS = 3000;
 const MAX_AGE_HR_READING_MS = 5000;
 // How often HR readings are plotted on the graph
 const HR_GRAPH_PLOT_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
+// Max age of the most recent HR reading that should be displayed on the graph
+const MAX_AGE_HR_GRAPH_VALUES_MS = 15 * 60 * 1000; // 15 minutes
 
 const STATE_FILENAME = 'prev_state.cbor';
 const STATE_FILETYPE = 'cbor';
@@ -34,15 +36,13 @@ const STATE_KEY_SCREEN_INDEX = 'screen_index';
 const STATE_KEY_STATS_INDEX = 'stats_index';
 const STATE_KEY_HR_GRAPH_VALUES = 'hr_graph_values';
 const STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP = 'hr_graph_values_timestamp';
-// Max age of usable HR graph values loaded from previous state
-const STATE_MAX_AGE_HR_GRAPH_VALUES_MS = HR_GRAPH_PLOT_INTERVAL_MS;
 
 // State
 // Load previous state so it can be used in the rest of initialization
 const prevState = loadPreviousState();
 let screenIndex = prevState[STATE_KEY_SCREEN_INDEX] || SCREEN_STATS_INDEX;
 let statsIndex = prevState[STATE_KEY_STATS_INDEX] || STATS_WEATHER_INDEX;
-let lastHrmReadingTimestamp = null;
+let lastHrmReadingTimestamp = prevState[STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP] || null;
 let lastHrmPlotTimestamp = null;
 let weatherUpdatedTimestamp = null;
 let updateActivityTimer = null;
@@ -94,7 +94,7 @@ setupTimers();
 function loadPreviousState() {
   try {
     const prevState = fs.readFileSync(STATE_FILENAME, STATE_FILETYPE);
-    if (Date.now() - prevState[STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP] > STATE_MAX_AGE_HR_GRAPH_VALUES_MS) {
+    if (Date.now() - prevState[STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP] > MAX_AGE_HR_GRAPH_VALUES_MS) {
       delete prevState[STATE_KEY_HR_GRAPH_VALUES];
     }
     return prevState;
@@ -106,8 +106,8 @@ function loadPreviousState() {
 }
 
 function handleAppUnload() {
-  prevState[STATE_KEY_HR_GRAPH_VALUES] = hrGraph.getValues();
-  prevState[STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP] = Date.now();
+  prevState[STATE_KEY_HR_GRAPH_VALUES] = hrGraph.getValues() || [];
+  prevState[STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP] = lastHrmReadingTimestamp || Date.now();
   prevState[STATE_KEY_SCREEN_INDEX] = screenIndex;
   prevState[STATE_KEY_STATS_INDEX] = statsIndex;
   fs.writeFileSync(STATE_FILENAME, prevState, STATE_FILETYPE);
@@ -225,17 +225,24 @@ function updateHeartRate(heartRate) {
     lastHrmReadingTimestamp = now;
     heartRateEl.text = heartRate
     heartRateEl.style.fill = heartRateFill;
-    // TODO show arrow
   } else {
     heartRateEl.text = '--';
     heartRateEl.style.fill = '#ffffff';
-    // TODO hide arrow
+  }
+  
+  // Clear graph if the last reading was really old
+  if (now - lastHrmReadingTimestamp >= MAX_AGE_HR_GRAPH_VALUES_MS) {
+    hrGraph.clearValues();
+    // Don't plot 0 value after the graph was just cleared
+    if (!heartRate) {
+      return;
+    }
   }
 
   // Add HR reading to graph
   // NOTE: A point is still plotted even if heartrate is 0
-  // or if a new heartrate reading hasn't been seen so that
-  // old values will be cleared over time
+  // or if a new heartrate reading hasn't been seen to
+  // show that there was a gap in readings
   if (now - lastHrmPlotTimestamp >= HR_GRAPH_PLOT_INTERVAL_MS) {
     lastHrmPlotTimestamp = now;
 

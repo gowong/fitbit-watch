@@ -58,7 +58,6 @@ function updateWeather() {
           localStorage.setItem(STORAGE_KEY_WEATHER_TIMESTAMP, `${weather.timestamp}`);
         });
     }).catch((error) => {
-      // TODO send error message to watch
       console.error('Companion update weather error: ' + error);
     });
 }
