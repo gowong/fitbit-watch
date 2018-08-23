@@ -3,6 +3,7 @@ import { encode } from 'cbor';
 import { outbox } from 'file-transfer';
 import { geolocation } from 'geolocation';
 import { localStorage } from 'local-storage';
+import * as messaging from 'messaging';
 import { settingsStorage } from 'settings';
 import fileTransfer from '../common/file-transfer';
 import settings from '../common/settings';
@@ -30,6 +31,9 @@ setupTimer();
 // Listen to setting changes while companion app is running
 settingsStorage.onchange = (event) => {
   switch (event.key) {
+    case settings.THEME_ACCENT_COLOR_KEY:
+      sendSettingToDevice(event.key);
+      break;
     case settings.WEATHER_TEMP_UNITS_KEY:
       updateWeather();
       break;
@@ -46,6 +50,9 @@ if (me.launchReasons.settingsChanged) {
   if (localStorage.getItem(STORAGE_KEY_WEATHER_TEMP_UNITS) !== getTemperatureUnitsSetting()) {
     updateWeather();
   }
+  // No good way to detect that these settings changed so just send them every time
+  // It's fine because updating the UI using these settings is inexpensive
+  sendSettingToDevice(settings.THEME_ACCENT_COLOR_KEY);
 }
 
 function setupTimer() {
@@ -109,6 +116,18 @@ function getWeather(position) {
           };
         });
     });
+}
+
+function sendSettingToDevice(settingKey) {
+  if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) {
+    messaging.peerSocket.send({
+      settingKey: settingKey,
+      // This only works for string values (ie. values that don't need to be JSON parsed)
+      value: settingsStorage.getItem(settingKey)
+    });
+  } else {
+    console.error('Companion send setting to device error: No peerSocket connection');
+  }
 }
 
 function getTemperatureUnitsSetting() {

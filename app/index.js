@@ -5,11 +5,13 @@ import { display } from 'display';
 import { inbox } from 'file-transfer';
 import * as fs from "fs";
 import { HeartRateSensor } from 'heart-rate';
+import * as messaging from 'messaging';
 import { today } from 'user-activity';
 import { user } from 'user-profile';
 import { preferences, units } from 'user-settings';
 import * as utils from '../common/utils';
 import fileTransfer from '../common/file-transfer';
+import settings from '../common/settings';
 import Graph from './graph';
 
 // Constants
@@ -34,6 +36,7 @@ const STATE_FILENAME = 'prev_state.cbor';
 const STATE_FILETYPE = 'cbor';
 const STATE_KEY_SCREEN_INDEX = 'screen_index';
 const STATE_KEY_STATS_INDEX = 'stats_index';
+const STATE_KEY_THEME_ACCENT_COLOR = 'theme_accent_color';
 const STATE_KEY_HR_GRAPH_VALUES = 'hr_graph_values';
 const STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP = 'hr_graph_values_timestamp';
 
@@ -46,6 +49,7 @@ let lastHrmReadingTimestamp = prevState[STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP] || 
 let lastHrmPlotTimestamp = null;
 let weatherUpdatedTimestamp = null;
 let updateActivityTimer = null;
+let themeAccentColor = prevState[STATE_KEY_THEME_ACCENT_COLOR] || 'fb-orange';
 
 // Elements
 const timeEl = document.getElementById('time');
@@ -79,10 +83,12 @@ clock.ontick = handleClockTick;
 hrm.onreading = handleHeartRateReading;
 hrm.onerror = handleHeartRateError;
 inbox.onnewfile = handleNewFiles;
+messaging.peerSocket.onmessage = handleNewMessage;
 document.getElementById('screen').onclick = handleScreenClick;
 document.getElementById('toggle-stats-container').onclick = handleStatsClick;
 
 // Setup watchface
+updateTheme();
 updateSelectedScreen();
 updateSelectedStats();
 hrm.start();
@@ -110,6 +116,7 @@ function handleAppUnload() {
   prevState[STATE_KEY_HR_GRAPH_VALUES_TIMESTAMP] = lastHrmReadingTimestamp || Date.now();
   prevState[STATE_KEY_SCREEN_INDEX] = screenIndex;
   prevState[STATE_KEY_STATS_INDEX] = statsIndex;
+  prevState[STATE_KEY_THEME_ACCENT_COLOR] = themeAccentColor;
   fs.writeFileSync(STATE_FILENAME, prevState, STATE_FILETYPE);
 }
 
@@ -121,6 +128,28 @@ function handleNewFiles() {
         break;
     }
   }
+}
+
+function handleNewMessage(event) {
+  if (!!event.data.settingKey) {
+    handleSettingChange(event);
+    return;
+  }
+}
+
+function handleSettingChange(event) {
+  switch (event.data.settingKey) {
+    case settings.THEME_ACCENT_COLOR_KEY:
+      themeAccentColor = event.data.value;
+      updateTheme();
+      break;
+  }
+}
+
+function updateTheme() {
+  document.getElementsByClassName('accent').forEach((element) => {
+    element.style.fill = themeAccentColor;
+  });
 }
 
 function handleDisplayChange() {
