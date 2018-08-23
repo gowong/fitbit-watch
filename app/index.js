@@ -98,7 +98,7 @@ function loadPreviousState() {
       delete prevState[STATE_KEY_HR_GRAPH_VALUES];
     }
     return prevState;
-  } catch (e) {
+  } catch (error) {
     console.error('Device load previous state error: ' + error);
     // State file might not exist
     return {};
