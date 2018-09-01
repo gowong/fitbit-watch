@@ -30,10 +30,6 @@ text {
   visibility: hidden;
 }
 
-#screen {
-/*   viewport-fill: blue; */
-}
-
 #time {
   /* Default value is too small */
   text-length: 32;

@@ -1,9 +1,11 @@
 <svg id="screen">
   <section x="5%" y="5%" width="90%" height="90%">
 
-    <!-- TODO delete this -->
+    <!-- Not sure why but this is needed so that clicks anywhere on the
+         #screen SVG element are handled. Without this rect element,
+         clicks on the HR graph don't work. -->
     <rect width="100%" height="100%" fill="black" />
-
+    
     <!-- First row -->
     <text id="weekday" class="accent" />
     <text id="dayOfMonth" class="value" />
@@ -16,7 +18,6 @@
       <text id="steps" class="value" text-buffer="0"/>
       <text id="bpm" text-buffer="BPM" class="accent" />
       <text id="heartrate" class="value" text-buffer="--" />
-      <!-- TODO add heartrate arrow -->
       <svg id="toggle-stats-container" pointer-events="visible">
         <svg id="weather" class="toggle-stats-section">
           <text id="weather-location" class="accent" text-buffer="WEATHER" />
@@ -25,7 +26,7 @@
         </svg>
         <svg id="cgm" class="toggle-stats-section">
           <text id="cgm-bg-label" class="accent" text-buffer="BLOOD GLUCOSE" />
-          <text id="cgm-bg" class="value" text-buffer="103" />
+          <text id="cgm-bg" class="value" text-buffer="--" />
           <!-- TODO add arrow -->
         </svg>
       </svg>

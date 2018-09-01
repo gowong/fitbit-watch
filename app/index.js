@@ -15,12 +15,13 @@ import settings from '../common/settings';
 import Graph from './graph';
 
 // Constants
-// TODO change to 3
+// TODO change to 2 when CGM is supported
 const NUM_SCREENS = 2;
 const SCREEN_STATS_INDEX = 0;
 const SCREEN_HR_INDEX = 1;
 const SCREEN_BG_INDEX = 2;
-const NUM_STATS = 2;
+// TODO change to 2 when CGM is supported
+const NUM_STATS = 1;
 const STATS_WEATHER_INDEX = 0;
 const STATS_CGM_INDEX = 1;
 
