@@ -17,7 +17,7 @@ export default class Graph {
     this.minY = minY;
     this.maxY = maxY;
     this.scaleY = (maxY - minY) / this.graphHeight;
-    
+
     this.highLabel.text = maxY;
     this.midLabel.text = Math.round((maxY + minY) / 2);
     this.lowLabel.text = minY;
@@ -45,8 +45,12 @@ export default class Graph {
       return;
     }
     this.vals = vals;
+
     const yVals = vals.map((val) => val.y);
-    this.setYRange(Math.min.apply(Math, yVals), Math.max.apply(Math, yVals));
+    const minY = Math.min.apply(Math, yVals.concat(this.minY));
+    const maxY = Math.max.apply(Math, yVals.concat(this.maxY));
+    this.setYRange(minY, maxY);
+
     this.updatePoints();
   }
   
