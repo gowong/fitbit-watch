@@ -24,7 +24,6 @@ export default class Graph {
   }
 
   addValue(newValue) {
-    // TODO round min and max so that points aren't at the edge of the graph
     if (newValue.y < this.minY) {
       this.setYRange(newValue.y, this.maxY);
     } else if (newValue.y > this.maxY) {
@@ -46,6 +45,8 @@ export default class Graph {
       return;
     }
     this.vals = vals;
+    const yVals = vals.map((val) => val.y);
+    this.setYRange(Math.min.apply(Math, yVals), Math.max.apply(Math, yVals));
     this.updatePoints();
   }
   
@@ -60,9 +61,9 @@ export default class Graph {
 
   updatePoints() {
     for (let i = 0; i < this.points.length; i++) {
-      const point = this.points[i];
+      const point = this.points[this.points.length - i - 1];
       if (i < this.vals.length) {
-        const val = this.vals[i];
+        const val = this.vals[this.vals.length - i - 1];
         point.cy = this.graphHeight - ((val.y - this.minY) / this.scaleY);
         point.style.fill = val.fill || '#ffffff';
         point.style.visibility = 'visible';
