@@ -26,7 +26,7 @@ const STATS_CGM_INDEX = 1;
 
 const ACTIVITY_UPDATE_INTERVAL_MS = 3000;
 // Max time an HR reading is shown before being zeroed out
-const MAX_AGE_HR_READING_MS = 5000;
+const MAX_AGE_HR_READING_MS = 8000;
 // How often HR readings are plotted on the graph
 const HR_GRAPH_PLOT_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
 // Max age of the most recent HR reading that should be displayed on the graph
