@@ -30,7 +30,7 @@ const MAX_AGE_HR_READING_MS = 8000;
 // How often HR readings are plotted on the graph
 const HR_GRAPH_PLOT_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
 // Max age of the most recent HR reading that should be displayed on the graph
-const MAX_AGE_HR_GRAPH_VALUES_MS = 15 * 60 * 1000; // 15 minutes
+const MAX_AGE_HR_GRAPH_VALUES_MS = 20 * 60 * 1000; // 20 minutes
 
 const STATE_FILENAME = 'prev_state.cbor';
 const STATE_FILETYPE = 'cbor';
@@ -232,9 +232,9 @@ function handleHeartRateError() {
 
 function updateHeartRate(heartRate) {
   const now = Date.now();
-  let heartRateFill;
 
   if (heartRate) {
+    let heartRateFill;
     // Only use a color if heart rate is valid
     switch (user.heartRateZone(heartRate)) {
       case 'peak':
@@ -251,34 +251,29 @@ function updateHeartRate(heartRate) {
         break;
     }
 
-    lastHrmReadingTimestamp = now;
     heartRateEl.text = heartRate
     heartRateEl.style.fill = heartRateFill;
+
+    // Clear graph if the last reading was really old
+    if (now - lastHrmReadingTimestamp >= MAX_AGE_HR_GRAPH_VALUES_MS) {
+      hrGraph.clearValues();
+    }
+
+    // Add HR reading to graph (ignore 0 values)
+    if (now - lastHrmPlotTimestamp >= HR_GRAPH_PLOT_INTERVAL_MS) {
+      lastHrmPlotTimestamp = now;
+
+      hrGraph.addValue({
+        y: heartRate,
+        fill: heartRateFill
+      });
+    }
+
+    lastHrmReadingTimestamp = now;
+
   } else {
     heartRateEl.text = '--';
     heartRateEl.style.fill = '#ffffff';
-  }
-  
-  // Clear graph if the last reading was really old
-  if (now - lastHrmReadingTimestamp >= MAX_AGE_HR_GRAPH_VALUES_MS) {
-    hrGraph.clearValues();
-    // Don't plot 0 value after the graph was just cleared
-    if (!heartRate) {
-      return;
-    }
-  }
-
-  // Add HR reading to graph
-  // NOTE: A point is still plotted even if heartrate is 0
-  // or if a new heartrate reading hasn't been seen to
-  // show that there was a gap in readings
-  if (now - lastHrmPlotTimestamp >= HR_GRAPH_PLOT_INTERVAL_MS) {
-    lastHrmPlotTimestamp = now;
-
-    hrGraph.addValue({
-      y: heartRate || 0,
-      fill: heartRateFill
-    });
   }
 }
 
