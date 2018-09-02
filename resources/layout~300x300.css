@@ -1,1 +1,132 @@
-/* TODO */
+.accent {
+  font-size: 25;
+}
+
+.value {
+  font-size: 40;
+}
+
+.caption {
+  font-size: 25;
+}
+
+.stats-section {
+  x: 0;
+  y: -40;
+}
+
+.toggle-stats-section {
+  x: 0;
+  y: 110;
+}
+
+.graph-label {
+  font-size: 16;
+  x: 0;
+}
+
+#weekday {
+  text-anchor: middle;
+  /* Make it centered with #dayOfMonth */
+  x: 11%+2;
+  y: 20;
+}
+
+#dayOfMonth {
+  text-anchor: middle;
+  x: 11%;
+  y: $+10;
+}
+
+#time {
+  font-size: 64;
+  text-anchor: end;
+  /* Leave space for #seconds */
+  x: 100%-45;
+  y: 57;
+}
+
+#seconds {
+  font-size: 30;
+  text-anchor: end;
+  x: 100%;
+  y: 33;
+}
+
+#main-stats {
+  y: 120;
+}
+
+#distance {
+  x: 0;
+  y: 0;
+}
+
+#steps {
+  font-size: 50;
+  x: 0;
+  y: $+18;
+}
+
+#bpm {
+  text-anchor: middle;
+  x: 85%;
+  y: 0;
+}
+
+#heartrate {
+  font-size: 50;
+  text-anchor: middle;
+  x: 85%;
+  y: $+18;
+}
+
+#weather-location {
+  x: 0;
+  y: 0;
+  width: 265;
+}
+
+#weather-temperature {
+  x: 0;
+  y: $+10;
+}
+
+#weather-updated {
+  x: $+15;
+  y: $-45;
+  width: 190;
+}
+
+#cgm-bg-label {
+  x: 0;
+  y: 0;
+}
+
+#cgm-bg {
+  x: 0;
+  y: $+10;
+}
+
+#graph-container {
+  x: 0;
+  y: 175;
+  width: 88%;
+  height: 130;
+}
+
+#graph-plot {
+  x: 12%;
+}
+
+#graph-label-high {
+  y: 8;
+}
+
+#graph-label-middle {
+  y: 50%+5;
+}
+
+#graph-label-low {
+  y: 100%;
+}
