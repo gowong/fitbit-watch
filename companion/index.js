@@ -39,11 +39,13 @@ settingsStorage.onchange = (event) => {
       break;
   }
 };
+// Treat any launch of the companion app as a "wake"
+// This is so that the weather gets updated immediately
+// when the watchface is first installed and also
+// periodically whenever the app is woken up by the wake timer
+handleWake();
 
 // Launch reasons
-if (me.launchReasons.wokenUp) {
-  handleWake();
-}
 if (me.launchReasons.settingsChanged) {
   // Update weather if temp units setting is different from the temp units
   // used in the last weather update
