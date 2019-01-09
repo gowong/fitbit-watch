@@ -9,6 +9,7 @@ import fileTransfer from '../common/file-transfer';
 import settings from '../common/settings';
 
 // Constants
+const WEATHERBIT_API_KEY = '0002be6b19d04f518ca1b5f262a134cd';
 const WAKE_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 const GEOLOCATION_TIMEOUT_MS = 60 * 1000; // 1 minute
 const GEOLOCATION_MAX_AGE_MS = 15 * 60 * 1000; // 15 minutes
@@ -102,18 +103,21 @@ function getLocation() {
 }
 
 function getWeather(position) {
-  const coordinates = `${position.coords.latitude},${position.coords.longitude}`;
-  const tempUnits = getTemperatureUnitsSetting();
-  const queryString = 'select item.condition,location from weather.forecast where woeid in'
-    + `(SELECT woeid FROM geo.places(1) WHERE text="(${coordinates})") and u="${tempUnits}"`;
-  const requestURL = `https://query.yahooapis.com/v1/public/yql?q=${queryString}&format=json`;
+  const coordinates = `lat=${position.coords.latitude}&lon=${position.coords.longitude}`;
+  const tempUnits = getTemperatureUnitsSetting() === 'f' ? 'I' : 'M';
+  const requestURL = `https://api.weatherbit.io/v2.0/current?${coordinates}&units=${tempUnits}&key=${WEATHERBIT_API_KEY}`;
   return fetch(requestURL)
     .then((response) => {
        return response.json()
-        .then((data) => {
+        .then((body) => {
+          if (!body.data || !body.data.length || body.data[0].temp == null) {
+            throw new Error('Weather response missing current temperature');
+          }
+          const data = body.data[0];
+
           return {
-            temp: data.query.results.channel.item.condition.temp,
-            city: data.query.results.channel.location.city,
+            temp: Math.round(data.temp),
+            city: data.city_name,
             timestamp: Date.now()
           };
         });
@@ -132,6 +136,7 @@ function sendSettingToDevice(settingKey) {
   }
 }
 
+/* Returns either 'f' or 'c' */
 function getTemperatureUnitsSetting() {
   try {
     const setting = JSON.parse(settingsStorage.getItem(settings.WEATHER_TEMP_UNITS_KEY));
