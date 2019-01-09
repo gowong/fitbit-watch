@@ -12,7 +12,7 @@
 
 .stats-section {
   x: 0;
-  y: -25;
+  y: -30;
 }
 
 .toggle-stats-section {
@@ -35,7 +35,7 @@
 #dayOfMonth {
   text-anchor: middle;
   x: 11%;
-  y: $+10;
+  y: $+15;
 }
 
 #time {
@@ -54,7 +54,7 @@
 }
 
 #main-stats {
-  y: 97;
+  y: 95;
 }
 
 #distance {
@@ -65,19 +65,19 @@
 #steps {
   font-size: 50;
   x: 0;
-  y: $+18;
+  y: $+20;
 }
 
 #bpm {
   text-anchor: middle;
   x: 90%;
-  y: $-12;
+  y: $-5;
 }
 
 #heartrate {
   text-anchor: middle;
   x: 90%;
-  y: $+10;
+  y: $+15;
 }
 
 #weather-location {
@@ -88,12 +88,12 @@
 
 #weather-temperature {
   x: 0;
-  y: $+10;
+  y: $+15;
 }
 
 #weather-updated {
   x: $+15;
-  y: $-45;
+  y: $-40;
   width: 155;
 }
 
