@@ -126,10 +126,14 @@ function getWeather(position) {
 
 function sendSettingToDevice(settingKey) {
   if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) {
+    // This only works for string values (ie. values that don't need to be JSON parsed)
+    let value = settingsStorage.getItem(settingKey) || '';
+    // Strip quotes from values. Some settings like the ColorSelect stores values as strings with quotes
+    value = value.replace(/\"/g, '');
+    // Send setting
     messaging.peerSocket.send({
       settingKey: settingKey,
-      // This only works for string values (ie. values that don't need to be JSON parsed)
-      value: settingsStorage.getItem(settingKey)
+      value: value
     });
   } else {
     console.error('Companion send setting to device error: No peerSocket connection');
