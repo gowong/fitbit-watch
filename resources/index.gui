@@ -42,5 +42,17 @@
       <text class="accent" text-buffer="HEART RATE" />
       <use id="heartrate-graph" href="#graph" />
     </svg>
+
+    <!-- Weather Stats -->
+    <svg id="weather-stats" class="stats-section">
+      <text id="weather-description" class="weather-stat accent" text-buffer="WEATHER" />
+      <text id="weather-wind" class="weather-stat" text-buffer="" />
+      <text id="weather-cloud" class="weather-stat" text-buffer="" />
+      <text id="weather-humidity" class="weather-stat" text-buffer="" />
+      <text id="weather-uv" class="weather-stat" text-buffer="" />
+      <text id="weather-precip" class="weather-stat" text-buffer="" />
+      <text id="weather-aqi" class="weather-stat" text-buffer="" />
+      <text id="weather-sun" class="weather-stat" text-buffer="" />
+    </svg>
   </section>
 </svg>

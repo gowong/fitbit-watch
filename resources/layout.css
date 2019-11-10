@@ -25,6 +25,10 @@
   x: 0;
 }
 
+.weather-stat {
+  font-size: 25;
+}
+
 #weekday {
   text-anchor: middle;
   /* Make it centered with #dayOfMonth */
@@ -130,4 +134,36 @@
   y: 100%;
 }
 
+#weather-wind {
+  y: $+5;
+}
 
+#weather-cloud {
+  /* Align to the right of wind element */
+  x: 100%-135;
+  y: $-28;
+}
+
+#weather-humidity {
+  y: $+5;
+}
+
+#weather-uv {
+  /* Align to the right of humidity element */
+  x: 100%-135;
+  y: $-28;
+}
+
+#weather-precip {
+  y: $+5;
+}
+
+#weather-aqi {
+  /* Align to the right of precip element */
+  x: 100%-135;
+  y: $-28;
+}
+
+#weather-sun {
+  y: $+5;
+}

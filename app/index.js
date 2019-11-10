@@ -15,11 +15,12 @@ import settings from '../common/settings';
 import Graph from './graph';
 
 // Constants
-// TODO change to 2 when CGM is supported
-const NUM_SCREENS = 2;
+// TODO change to 4 when CGM is supported
+const NUM_SCREENS = 3;
 const SCREEN_STATS_INDEX = 0;
 const SCREEN_HR_INDEX = 1;
-const SCREEN_BG_INDEX = 2;
+const SCREEN_WEATHER_INDEX = 2;
+const SCREEN_BG_INDEX = 3;
 // TODO change to 2 when CGM is supported
 const NUM_STATS = 1;
 const STATS_WEATHER_INDEX = 0;
@@ -68,6 +69,16 @@ const heartRateEl = document.getElementById('heartrate');
 const statsEl = document.getElementById('main-stats');
 const bgStatsEl = document.getElementById('bg-stats');
 const hrStatsEl = document.getElementById('heartrate-stats');
+const weatherStatsEl = document.getElementById('weather-stats');
+const weatherDescriptionEl = document.getElementById('weather-description');
+const weatherWindEl = document.getElementById('weather-wind');
+const weatherHumidityEl = document.getElementById('weather-humidity');
+const weatherCloudEl = document.getElementById('weather-cloud');
+const weatherPrecipEl = document.getElementById('weather-precip');
+const weatherAirQualityEl = document.getElementById('weather-aqi');
+const weatherUvEl = document.getElementById('weather-uv');
+const weatherSunEl = document.getElementById('weather-sun');
+const weatherSunsetEl = document.getElementById('weather-sunset');
 
 // Widgets
 let hrGraph;
@@ -281,9 +292,34 @@ function updateHeartRate(heartRate) {
 function updateWeather() {
   try {
     const weather = fs.readFileSync(fileTransfer.WEATHER_DATA_FILENAME, fileTransfer.WEATHER_DATA_FILETYPE);
-    weatherTempEl.text = `${weather.temp}°`;
-    weatherLocationEl.text = weather.city.toUpperCase();
-    weatherUpdatedTimestamp = weather.timestamp;
+    const {
+      airQuality,
+      city,
+      cloudCover,
+      description,
+      humidity,
+      isMetricUnits,
+      precip,
+      sunriseTimeStr,
+      sunsetTimeStr,
+      timestamp,
+      temp,
+      uv,
+      windDirection,
+      windSpeed
+    } = weather;
+    
+    weatherTempEl.text = `${temp}°`;
+    weatherLocationEl.text = city.toUpperCase();
+    weatherUpdatedTimestamp = timestamp;
+    weatherDescriptionEl.text = description.toUpperCase();
+    weatherWindEl.text = `WIND: ${Math.round(windSpeed)} ${windDirection}`;
+    weatherHumidityEl.text = `HUM: ${Math.round(humidity)}%`;
+    weatherCloudEl.text = `CLOUD: ${Math.round(cloudCover)}%`
+    weatherPrecipEl.text = `RAIN: ${precip.toFixed(1)}mm`
+    weatherAirQualityEl.text = `AIR: ${airQuality}`;
+    weatherUvEl.text = `UV: ${Math.round(uv)}`;
+    weatherSunEl.text = `SUN: ${sunriseTimeStr} - ${sunsetTimeStr}`;
     updateWeatherTime();
   } catch (error) {
     // Weather file might not exist (if weather hasn't been loaded before)
@@ -322,6 +358,7 @@ function updateSelectedScreen() {
   hide(statsEl);
   hide(bgStatsEl);
   hide(hrStatsEl);
+  hide(weatherStatsEl);
 
   // Show correct one
   switch (screenIndex) {
@@ -333,6 +370,9 @@ function updateSelectedScreen() {
       break;
     case SCREEN_HR_INDEX:
       show(hrStatsEl);
+      break;
+    case SCREEN_WEATHER_INDEX:
+      show(weatherStatsEl);
       break;
   }
 }

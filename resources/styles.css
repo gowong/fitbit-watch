@@ -30,6 +30,11 @@ text {
   visibility: hidden;
 }
 
+.weather-stat {
+  /* Default value is too small */
+  text-length: 64;
+}
+
 #time {
   /* Default value is too small */
   text-length: 32;

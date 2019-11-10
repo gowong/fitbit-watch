@@ -116,9 +116,20 @@ function getWeather(position) {
           const data = body.data[0];
 
           return {
-            temp: Math.round(data.temp),
+            airQuality: data.aqi,
             city: data.city_name,
-            timestamp: Date.now()
+            cloudCover: data.clouds,
+            description: data.weather ? data.weather.description : '',
+            humidity: data.rh,
+            isMetricUnits: tempUnits === 'M',
+            precip: data.precip,
+            sunriseTimeStr: data.sunrise,
+            sunsetTimeStr: data.sunset,
+            timestamp: Date.now(),
+            temp: Math.round(data.temp),
+            uv: data.uv,
+            windDirection: data.wind_cdir,
+            windSpeed: data.wind_spd
           };
         });
     });
