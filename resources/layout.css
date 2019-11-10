@@ -71,7 +71,7 @@
 #bpm {
   text-anchor: middle;
   x: 90%;
-  y: $-5;
+  y: $-14;
 }
 
 #heartrate {
@@ -93,7 +93,7 @@
 
 #weather-updated {
   x: $+15;
-  y: $-40;
+  y: $-45;
   width: 155;
 }
 

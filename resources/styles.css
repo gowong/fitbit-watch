@@ -49,6 +49,11 @@ text {
   text-length: 64;
 }
 
+#heartrate {
+  /* Default value is too small */
+  text-length: 32;
+}
+
 #weather-location {
   /* Default value is too small */
   text-length: 64;
