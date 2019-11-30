@@ -12,12 +12,12 @@
 
 .stats-section {
   x: 0;
-  y: -40;
+  y: -50;
 }
 
 .toggle-stats-section {
   x: 0;
-  y: 110;
+  y: 100;
 }
 
 .graph-label {
@@ -25,21 +25,24 @@
   x: 0;
 }
 
+.weather-stat {
+  font-size: 25;
+}
+
 #weekday {
   text-anchor: middle;
-  /* Make it centered with #dayOfMonth */
-  x: 11%+2;
+  x: 11%;
   y: 20;
 }
 
 #dayOfMonth {
   text-anchor: middle;
   x: 11%;
-  y: $+10;
+  y: $+12;
 }
 
 #time {
-  font-size: 64;
+  font-size: 68;
   text-anchor: end;
   /* Leave space for #seconds */
   x: 100%-45;
@@ -47,7 +50,7 @@
 }
 
 #seconds {
-  font-size: 30;
+  font-size: 32;
   text-anchor: end;
   x: 100%;
   y: 33;
@@ -65,7 +68,7 @@
 #steps {
   font-size: 50;
   x: 0;
-  y: $+18;
+  y: $+20;
 }
 
 #bpm {
@@ -78,7 +81,7 @@
   font-size: 50;
   text-anchor: middle;
   x: 85%;
-  y: $+18;
+  y: $+20;
 }
 
 #weather-location {
@@ -89,7 +92,7 @@
 
 #weather-temperature {
   x: 0;
-  y: $+10;
+  y: $+15;
 }
 
 #weather-updated {
@@ -112,7 +115,7 @@
   x: 0;
   y: 175;
   width: 88%;
-  height: 130;
+  height: 140;
 }
 
 #graph-plot {
@@ -129,4 +132,38 @@
 
 #graph-label-low {
   y: 100%;
+}
+
+#weather-wind {
+  y: $+5;
+}
+
+#weather-cloud {
+  /* Align to the right of wind element */
+  x: 100%-135;
+  y: $-28;
+}
+
+#weather-humidity {
+  y: $+5;
+}
+
+#weather-uv {
+  /* Align to the right of humidity element */
+  x: 100%-135;
+  y: $-28;
+}
+
+#weather-precip {
+  y: $+5;
+}
+
+#weather-aqi {
+  /* Align to the right of precip element */
+  x: 100%-135;
+  y: $-28;
+}
+
+#weather-sun {
+  y: $+5;
 }

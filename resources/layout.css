@@ -31,8 +31,7 @@
 
 #weekday {
   text-anchor: middle;
-  /* Make it centered with #dayOfMonth */
-  x: 11%+2;
+  x: 11%;
   y: 20;
 }
 
