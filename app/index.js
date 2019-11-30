@@ -16,7 +16,7 @@ import Graph from './graph';
 
 // Constants
 // TODO change to 4 when CGM is supported
-const NUM_SCREENS = 3;
+const NUM_SCREENS = 2;
 const SCREEN_STATS_INDEX = 0;
 const SCREEN_HR_INDEX = 1;
 const SCREEN_WEATHER_INDEX = 2;
