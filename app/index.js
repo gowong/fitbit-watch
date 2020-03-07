@@ -69,6 +69,7 @@ const heartRateEl = document.getElementById('heartrate');
 const statsEl = document.getElementById('main-stats');
 const bgStatsEl = document.getElementById('bg-stats');
 const hrStatsEl = document.getElementById('heartrate-stats');
+const heartRateSmallEl = document.getElementById('heartrate-small');
 const weatherStatsEl = document.getElementById('weather-stats');
 const weatherDescriptionEl = document.getElementById('weather-description');
 const weatherWindEl = document.getElementById('weather-wind');
@@ -265,6 +266,8 @@ function updateHeartRate(heartRate) {
 
     heartRateEl.text = heartRate
     heartRateEl.style.fill = heartRateFill;
+    heartRateSmallEl.text = heartRate
+    heartRateSmallEl.style.fill = heartRateFill;
 
     // Clear graph if the last reading was really old
     if (now - lastHrmReadingTimestamp >= MAX_AGE_HR_GRAPH_VALUES_MS) {
@@ -286,6 +289,8 @@ function updateHeartRate(heartRate) {
   } else {
     heartRateEl.text = '--';
     heartRateEl.style.fill = '#ffffff';
+    heartRateSmallEl.text = '';
+    heartRateSmallEl.style.fill = '#ffffff';
   }
 }
 

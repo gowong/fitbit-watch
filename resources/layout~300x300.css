@@ -111,6 +111,12 @@
   y: $+10;
 }
 
+#heartrate-small {
+  font-size: 32;
+  text-anchor: end;
+  x: 100%;
+}
+
 #graph-container {
   x: 0;
   y: 175;
