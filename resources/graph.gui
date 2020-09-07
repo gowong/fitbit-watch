@@ -1,9 +1,9 @@
 <symbol id="graph">
   <svg id="graph-container">
     <svg id="graph-plot">
-      <line id="graph-line-high" class="graph-hor-line" x1="0" y1="0" x2="100%" y2="0" />
-      <line id="graph-line-middle" class="graph-hor-line" x1="0" y1="50%" x2="100%" y2="50%" />
-      <line id="graph-line-low" class="graph-hor-line" x1="0" y1="100%" x2="100%" y2="100%" />
+      <line id="graph-line-high" class="graph-hor-line" x1="5%" y1="0" x2="95%" y2="0" />
+      <line id="graph-line-middle" class="graph-hor-line" x1="5%" y1="50%" x2="95%" y2="50%" />
+      <line id="graph-line-low" class="graph-hor-line" x1="5%" y1="98%" x2="95%" y2="98%" />
 
       <circle class="graph-point" cx="4%" cy="50%" r="2" />
       <circle class="graph-point" cx="8%" cy="50%" r="2" />
