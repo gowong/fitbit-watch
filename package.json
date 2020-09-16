@@ -1,4 +1,7 @@
 {
+  "devDependencies": {
+    "@fitbit/sdk": "4.2"
+  },
   "fitbit": {
     "appUUID": "568621e3-7455-4ba9-aecf-962f26a2f17e",
     "appType": "clockface",
@@ -20,13 +23,10 @@
       "gemini"
     ],
     "i18n": {
-      "en": {
+      "en-US": {
         "name": "Watch"
       }
     },
     "defaultLanguage": "en-US"
-  },
-  "devDependencies": {
-    "@fitbit/sdk": "~4.0.0"
   }
 }
