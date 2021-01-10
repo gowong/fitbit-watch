@@ -63,6 +63,7 @@ const distanceEl = document.getElementById('distance');
 const weatherEl = document.getElementById('weather');
 const weatherTempEl = document.getElementById('weather-temperature');
 const weatherLocationEl = document.getElementById('weather-location');
+const weatherDescriptionEl = document.getElementById('weather-description');
 const weatherUpdatedEl = document.getElementById('weather-updated');
 const cgmEl = document.getElementById('cgm');
 const heartRateEl = document.getElementById('heartrate');
@@ -71,7 +72,7 @@ const bgStatsEl = document.getElementById('bg-stats');
 const hrStatsEl = document.getElementById('heartrate-stats');
 const heartRateSmallEl = document.getElementById('heartrate-small');
 const weatherStatsEl = document.getElementById('weather-stats');
-const weatherDescriptionEl = document.getElementById('weather-description');
+const weatherDescriptionTitleEl = document.getElementById('weather-description-title');
 const weatherWindEl = document.getElementById('weather-wind');
 const weatherHumidityEl = document.getElementById('weather-humidity');
 const weatherCloudEl = document.getElementById('weather-cloud');
@@ -317,6 +318,7 @@ function updateWeather() {
     weatherLocationEl.text = location ? location.toUpperCase() : '*';
     weatherUpdatedTimestamp = timestamp;
     weatherDescriptionEl.text = description ? description.toUpperCase() : '';
+    weatherDescriptionTitleEl.text = description ? description.toUpperCase() : '';
     weatherWindEl.text = `WIND: ${Math.round(windSpeed)} ${windDirection}`;
     weatherHumidityEl.text = `HUM: ${humidity ? Math.round(humidity) + '%' : '*'}`;
     weatherCloudEl.text = `CLOUD: ${cloudCover ? Math.round(cloudCover) + '%' : '*'}`
@@ -338,13 +340,12 @@ function updateWeatherTime() {
   }
   const timeDiff = Date.now() - (new Date(weatherUpdatedTimestamp)).getTime();
   const minutes = Math.round(timeDiff / 60 / 1000);
-  if (minutes <= 1) {
-    weatherUpdatedEl.text = "NOW";
-  } else if (minutes >= 60) {
+
+  if (minutes >= 120) {
     const hours = Math.round(minutes / 60);
     weatherUpdatedEl.text = `${hours} HR AGO`;
   } else {
-    weatherUpdatedEl.text = `${minutes} MIN AGO`;
+    weatherUpdatedEl.text = '';
   }
 }
 

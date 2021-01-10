@@ -10,6 +10,10 @@
   font-size: 25;
 }
 
+.caption.small {
+  font-size: 15;
+}
+
 .stats-section {
   x: 0;
   y: -30;
@@ -94,9 +98,16 @@
   y: $+15;
 }
 
+#weather-description {
+  x: $+10;
+  y: $-59;
+  width: 175;
+  font-size: 20;
+}
+
 #weather-updated {
-  x: $+15;
-  y: $-45;
+  x: 70;
+  y: $-5;
   width: 155;
 }
 

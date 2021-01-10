@@ -5,7 +5,7 @@
          #screen SVG element are handled. Without this rect element,
          clicks on the HR graph don't work. -->
     <rect width="100%" height="100%" fill="black" />
-    
+
     <!-- First row -->
     <text id="weekday" class="accent" />
     <text id="dayOfMonth" class="value" />
@@ -22,7 +22,8 @@
         <svg id="weather" class="toggle-stats-section">
           <text id="weather-location" class="accent" text-buffer="WEATHER" />
           <text id="weather-temperature" class="value" text-buffer="--" />
-          <text id="weather-updated" class="caption" text-buffer="" />
+          <text id="weather-description" class="caption" text-buffer="" />
+          <text id="weather-updated" class="caption small" text-buffer="" />
         </svg>
         <svg id="cgm" class="toggle-stats-section">
           <text id="cgm-bg-label" class="accent" text-buffer="BLOOD GLUCOSE" />
@@ -46,7 +47,7 @@
 
     <!-- Weather Stats -->
     <svg id="weather-stats" class="stats-section">
-      <text id="weather-description" class="weather-stat accent" text-buffer="WEATHER" />
+      <text id="weather-description-title" class="weather-stat accent" text-buffer="WEATHER" />
       <text id="weather-wind" class="weather-stat" text-buffer="" />
       <text id="weather-cloud" class="weather-stat" text-buffer="" />
       <text id="weather-humidity" class="weather-stat" text-buffer="" />

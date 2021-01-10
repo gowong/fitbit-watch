@@ -77,3 +77,8 @@ text {
   /* Default value is too small */
   text-length: 32;
 }
+
+#weather-description {
+  /* Default value is too small */
+  text-length: 32;
+}
