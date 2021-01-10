@@ -299,11 +299,10 @@ function updateWeather() {
     const weather = fs.readFileSync(fileTransfer.WEATHER_DATA_FILENAME, fileTransfer.WEATHER_DATA_FILETYPE);
     const {
       airQuality,
-      city,
+      location,
       cloudCover,
       description,
       humidity,
-      isMetricUnits,
       precip,
       sunriseTimeStr,
       sunsetTimeStr,
@@ -313,18 +312,19 @@ function updateWeather() {
       windDirection,
       windSpeed
     } = weather;
-    
-    weatherTempEl.text = `${temp}°`;
-    weatherLocationEl.text = city.toUpperCase();
+
+    weatherTempEl.text = `${Math.round(temp)}°`;
+    weatherLocationEl.text = location ? location.toUpperCase() : '*';
     weatherUpdatedTimestamp = timestamp;
-    weatherDescriptionEl.text = description.toUpperCase();
+    weatherDescriptionEl.text = description ? description.toUpperCase() : '';
     weatherWindEl.text = `WIND: ${Math.round(windSpeed)} ${windDirection}`;
-    weatherHumidityEl.text = `HUM: ${Math.round(humidity)}%`;
-    weatherCloudEl.text = `CLOUD: ${Math.round(cloudCover)}%`
-    weatherPrecipEl.text = `RAIN: ${precip.toFixed(1)}mm`
-    weatherAirQualityEl.text = `AIR: ${airQuality}`;
-    weatherUvEl.text = `UV: ${Math.round(uv)}`;
-    weatherSunEl.text = `SUN: ${sunriseTimeStr} - ${sunsetTimeStr}`;
+    weatherHumidityEl.text = `HUM: ${humidity ? Math.round(humidity) + '%' : '*'}`;
+    weatherCloudEl.text = `CLOUD: ${cloudCover ? Math.round(cloudCover) + '%' : '*'}`
+    weatherPrecipEl.text = `RAIN: ${precip ? Math.round(precip) + '%' : '*'}`
+    weatherAirQualityEl.text = `AIR: ${airQuality || '*'}`;
+    weatherUvEl.text = `UV: ${Math.round(uv) || '*'}`;
+    weatherSunEl.text = `SUN: ${sunriseTimeStr || '*'} - ${sunsetTimeStr || '*'}`;
+
     updateWeatherTime();
   } catch (error) {
     // Weather file might not exist (if weather hasn't been loaded before)

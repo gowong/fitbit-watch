@@ -9,7 +9,7 @@ import fileTransfer from '../common/file-transfer';
 import settings from '../common/settings';
 
 // Constants
-const WEATHERBIT_API_KEY = '0002be6b19d04f518ca1b5f262a134cd';
+const HERE_API_KEY = 'YmB0qORP5prqGBDfYJqEAptnLBOf7z9iDmJr0baqlTs';
 const WAKE_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 const GEOLOCATION_TIMEOUT_MS = 60 * 1000; // 1 minute
 const GEOLOCATION_MAX_AGE_MS = 15 * 60 * 1000; // 15 minutes
@@ -99,37 +99,55 @@ function getLocation() {
       maximumAge: GEOLOCATION_MAX_AGE_MS,
       timeout: GEOLOCATION_TIMEOUT_MS
     });
+  }).then((position) => {
+    const requestURL = `https://revgeocode.search.hereapi.com/v1/revgeocode?at=${position.coords.latitude},${position.coords.longitude}&lang=en-US&apiKey=${HERE_API_KEY}`;
+
+    return fetch(requestURL)
+      .then((response) => {
+        return response.json()
+          .then((body) => {
+            const data = body && body.items && body.items[0];
+            if (!data) {
+              throw new Error('Invalid location response');
+            }
+
+            return {
+              name: data.address ? (data.address.city || data.address.county || data.address.district || data.address.state || data.address.countryName) : null,
+              lat: position.coords.latitude,
+              long: position.coords.longitude
+            };
+          });
+      });
   });
 }
 
-function getWeather(position) {
-  const coordinates = `lat=${position.coords.latitude}&lon=${position.coords.longitude}`;
-  const tempUnits = getTemperatureUnitsSetting() === 'f' ? 'I' : 'M';
-  const requestURL = `https://api.weatherbit.io/v2.0/current?${coordinates}&units=${tempUnits}&key=${WEATHERBIT_API_KEY}`;
+function getWeather(location) {
+  const useMetric = getTemperatureUnitsSetting() === 'f' ? false : true;
+  const requestURL = `https://weather.ls.hereapi.com/weather/1.0/report.json?product=observation&oneobservation=true&latitude=${location.lat}&longitude=${location.long}&metric=${useMetric}&apiKey=${HERE_API_KEY}`;
+
   return fetch(requestURL)
     .then((response) => {
-       return response.json()
+      return response.json()
         .then((body) => {
-          if (!body.data || !body.data.length || body.data[0].temp == null) {
-            throw new Error('Weather response missing current temperature');
+          const data = body && body.observations && body.observations.location && body.observations.location[0] && body.observations.location[0].observation && body.observations.location[0].observation[0];
+          if (!data) {
+            throw new Error('Invalid weather response');
           }
-          const data = body.data[0];
 
           return {
-            airQuality: data.aqi,
-            city: data.city_name,
-            cloudCover: data.clouds,
-            description: data.weather ? data.weather.description : '',
-            humidity: data.rh,
-            isMetricUnits: tempUnits === 'M',
-            precip: data.precip,
-            sunriseTimeStr: data.sunrise,
-            sunsetTimeStr: data.sunset,
-            timestamp: Date.now(),
-            temp: Math.round(data.temp),
-            uv: data.uv,
-            windDirection: data.wind_cdir,
-            windSpeed: data.wind_spd
+            airQuality: null,
+            cloudCover: null,
+            description: data.precipitationDesc || data.skyDescription || data.temperatureDesc || null,
+            humidity: data.humidity,
+            location: location.name,
+            precip: data.precipitationProbability,
+            sunriseTimeStr: null,
+            sunsetTimeStr: null,
+            temp: (data.comfort !== '*' && data.comfort) || data.temperature,
+            timestamp: Date.parse(data.utcTime) || Date.now(),
+            uv: data.uvIndex,
+            windDirection: data.windDescShort,
+            windSpeed: data.windSpeed
           };
         });
     });
