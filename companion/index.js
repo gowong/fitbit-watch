@@ -10,6 +10,7 @@ import settings from '../common/settings';
 
 // Constants
 const HERE_API_KEY = 'YmB0qORP5prqGBDfYJqEAptnLBOf7z9iDmJr0baqlTs';
+const DARKSKY_API_KEY = '87023d1fc23cf8ea98bc3b4b6de6ff89';
 const WAKE_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 const GEOLOCATION_TIMEOUT_MS = 60 * 1000; // 1 minute
 const GEOLOCATION_MAX_AGE_MS = 15 * 60 * 1000; // 15 minutes
@@ -122,14 +123,14 @@ function getLocation() {
 }
 
 function getWeather(location) {
-  const useMetric = getTemperatureUnitsSetting() === 'f' ? false : true;
-  const requestURL = `https://weather.ls.hereapi.com/weather/1.0/report.json?product=observation&oneobservation=true&latitude=${location.lat}&longitude=${location.long}&metric=${useMetric}&apiKey=${HERE_API_KEY}`;
+  const units = getTemperatureUnitsSetting() === 'f' ? 'us' : 'si';
+  const requestURL = `https://api.darksky.net/forecast/${DARKSKY_API_KEY}/${location.lat},${location.long}?units=${units}&exclude=minutely,hourly,daily,alerts,flags`;
 
   return fetch(requestURL)
     .then((response) => {
       return response.json()
         .then((body) => {
-          const data = body && body.observations && body.observations.location && body.observations.location[0] && body.observations.location[0].observation && body.observations.location[0].observation[0];
+          const data = body && body.currently;
           if (!data) {
             throw new Error('Invalid weather response');
           }
@@ -137,16 +138,16 @@ function getWeather(location) {
           return {
             airQuality: null,
             cloudCover: null,
-            description: data.precipitationDesc || data.skyDescription || data.temperatureDesc || null,
-            humidity: data.humidity,
+            description: data.summary || null,
+            humidity: data.humidity * 100,
             location: location.name,
-            precip: data.precipitationProbability,
+            precip: data.precipProbability,
             sunriseTimeStr: null,
             sunsetTimeStr: null,
-            temp: (data.comfort !== '*' && data.comfort) || data.temperature,
-            timestamp: Date.parse(data.utcTime) || Date.now(),
+            temp: data.temperature,
+            timestamp: Date.now(),
             uv: data.uvIndex,
-            windDirection: data.windDescShort,
+            windDirection: data.windBearing,
             windSpeed: data.windSpeed
           };
         });
