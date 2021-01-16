@@ -341,9 +341,11 @@ function updateWeatherTime() {
   const timeDiff = Date.now() - (new Date(weatherUpdatedTimestamp)).getTime();
   const minutes = Math.round(timeDiff / 60 / 1000);
 
-  if (minutes >= 120) {
+  if (minutes >= 60) {
     const hours = Math.round(minutes / 60);
     weatherUpdatedEl.text = `${hours} HR AGO`;
+  } else if (minutes >= 45) {
+    weatherUpdatedEl.text = `${minutes} MIN AGO`;
   } else {
     weatherUpdatedEl.text = '';
   }

@@ -14,7 +14,7 @@ const WAKE_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 const GEOLOCATION_TIMEOUT_MS = 60 * 1000; // 1 minute
 const GEOLOCATION_MAX_AGE_MS = 15 * 60 * 1000; // 15 minutes
 // Decrease slightly so it doesn't fall exactly on N * WAKE_INTERVAL_MS
-const WEATHER_UPDATE_INTERVAL_MS = (60 * 60 * 1000) - (5 * 60 * 1000); // 55 minutes
+const WEATHER_UPDATE_INTERVAL_MS = (30 * 60 * 1000) - (5 * 60 * 1000); // 25 minutes
 
 const STORAGE_KEY_WEATHER_TIMESTAMP = 'weather_timestamp';
 const STORAGE_KEY_WEATHER_TEMP_UNITS = 'weather_temperature_units';

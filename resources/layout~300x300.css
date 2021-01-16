@@ -100,13 +100,13 @@
 }
 
 #weather-description {
-  x: $+10;
+  x: $+5;
   y: $-55;
-  width: 190;
+  width: 200;
 }
 
 #weather-updated {
-  x: 70;
+  x: 65;
   y: $-10;
   width: 190;
 }
